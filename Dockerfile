@@ -10,6 +10,6 @@ COPY *.go ./
 
 EXPOSE 3071
 
-USER nonroot:nonroot
+#USER nonroot:nonroot
 
 CMD ["go","run","main.go"]
