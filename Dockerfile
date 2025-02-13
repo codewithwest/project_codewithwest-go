@@ -1,15 +1,18 @@
-FROM golang:alpine3.21
+FROM golang:1.24-alpine
 
 WORKDIR /app
 
-COPY go.mod go.sum ./
+RUN apk add --no-cache nodejs npm
+RUN npm install -g nodemon
 
+COPY go.mod go.sum ./
 RUN go mod download
 
-COPY *.go ./
+COPY . .
 
-EXPOSE 3071
+  #go build -o main ./main.go
 
-#USER nonroot:nonroot
+EXPOSE 3072
 
-CMD ["go","run","main.go"]
+# Corrected CMD instruction:
+CMD ["sh", "-c", "while true; do go run main.go; sleep 1; done"]

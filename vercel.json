@@ -1,5 +1,5 @@
 {
   "version": 2,
-  "builds": [{ "src": "main.go", "use": "@vercel/go" }],
-  "routes": [{ "src": "/(.*)", "dest": "/main.go" }]
+  "builds": [{ "src": "/handler/handler.go", "use": "@vercel/go" }],
+  "routes": [{ "src": "/(.*)", "dest": "/handler/handler.go" }]
 }
