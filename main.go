@@ -16,7 +16,7 @@ var LOGGER zerolog.Logger
 
 func main() {
 	LOGGER = zerolog.New(os.Stdout).With().Timestamp().
-		Str("app", "go-graphql-rst-api").
+		Str("app", "codewithwest-go").
 		Logger().With().Caller().Logger()
 
 	userType := schema.GetUserType()
@@ -29,6 +29,6 @@ func main() {
 	router := mux.NewRouter()
 	router.Handle("/graphql", userController.GetUser())
 
-	LOGGER.Info().Msg("Server at 8000")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	LOGGER.Info().Msg("Server at 3071")
+	log.Fatal(http.ListenAndServe(":3072", router))
 }

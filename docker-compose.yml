@@ -1,0 +1,24 @@
+services:
+  codewithwest-go:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: codewithwest-go
+    hostname: codewithwest-go
+    ports:
+      - "3071:3071"
+    volumes:
+      - .:/app:rw
+#    command: start-single-node --insecure
+    develop:
+      watch:
+        - path: ./go.mod
+          action: rebuild
+        - path: .
+          target: /app
+          action: sync
+    restart: always
+networks:
+  default:
+    name: node_dev
+    external: true
