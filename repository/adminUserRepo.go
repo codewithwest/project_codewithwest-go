@@ -38,7 +38,7 @@ func GetAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		log.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	var adminUser adminUserReusables.AdminUserInputMongo
