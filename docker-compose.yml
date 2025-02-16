@@ -6,7 +6,7 @@ services:
     container_name: codewithwest-go
     hostname: codewithwest-go
     ports:
-      - "3071:3071"
+      - "3071:3072"
     volumes:
       - .:/app:rw
 #    command: start-single-node --insecure

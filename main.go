@@ -1,52 +1,48 @@
-package handler
+package main
 
 import (
 	"context"
+	"go_server/handler"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/digvijay17july/golang-projects/go-graphql-rest-api/api"
-	"github.com/digvijay17july/golang-projects/go-graphql-rest-api/schema"
-
-	"github.com/gorilla/mux"
-	"github.com/rs/zerolog"
+	"os/signal"
+	"syscall"
 )
 
-var LOGGER zerolog.Logger
+func main() {
+	log.Println("Local server started in on port https://localhost:3072")
 
-func init() { // Initialize logger at package level
-	LOGGER = zerolog.New(os.Stdout).With().Timestamp().
-		Str("app", "codewithwest-go").
-		Logger().With().Caller().Logger()
-}
+	// Create a new HTTP server instance
+	srv := &http.Server{Addr: ":3072", Handler: nil} // Handler is nil here; use http.HandleFunc
 
-func Handler(w http.ResponseWriter, r *http.Request) { // Correct signature
-	ctx := r.Context()
-	ctx = context.WithValue(ctx, "logger", LOGGER) // Add logger to context
+	// Use http.HandleFunc to register the handler:
+	http.HandleFunc("/graphql", handler.Handler)
 
-	userType := schema.GetUserType()
+	// Create a context that can be cancelled
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel() // Cancel the context when the program exits
 
-	schemaObj, err := schema.GetSchema(userType)
-	if err != nil {
-		LOGGER.Err(err).Msg(err.Error())
-		http.Error(w, "Error getting schema", http.StatusInternalServerError) // Handle error
-		return                                                                // Important: Return after an error
+	// Start the server in a goroutine so it doesn't block
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed { // Use the srv instance
+			log.Fatalf("ListenAndServe error: %v", err)
+		}
+	}()
+
+	// Handle signals for graceful shutdown
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Wait for a signal
+	<-sigchan
+
+	log.Println("Shutting down server...")
+
+	// Gracefully shut down the server using the srv instance and the context
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Server shutdown error: %v", err)
 	}
 
-	userController := &api.UserController{Schema: schemaObj}
-
-	router := mux.NewRouter()
-	router.Handle("/graphql", userController.GetUser())
-
-	// Serve the request using the router
-	router.ServeHTTP(w, r)
-}
-
-func main() { // This is for local testing only
-	LOGGER = zerolog.New(os.Stdout).With().Timestamp().
-		Str("app", "codewithwest-go").
-		Logger().With().Caller().Logger()
-	http.HandleFunc("/graphql", Handler)
-	log.Fatal(http.ListenAndServe(":3072", nil))
+	log.Println("Server gracefully shut down.")
 }
