@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"go_server/api"
-	"go_server/schema"
+	"go_server/types"
 	"net/http"
 	"os"
 
@@ -25,7 +25,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	//types := schema.GetAllTypes()
 
-	schemaObj, err := schema.GetSchema()
+	schemaObj, err := types.GetSchema()
 	if err != nil {
 		LOGGER.Err(err).Msg(err.Error())
 		http.Error(w, "Error getting schema", http.StatusInternalServerError)

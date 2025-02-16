@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/graphql-go/graphql"
+	"go_server/helper/adminUserReusables"
 	"go_server/repository"
 )
 
@@ -10,8 +11,9 @@ func GetAdminUserSchema(adminUserType *graphql.Object) *graphql.Field {
 		Type:        adminUserType,
 		Description: "Get admin user by ID",
 		Args: graphql.FieldConfigArgument{
-			"id": &graphql.ArgumentConfig{
-				Type: graphql.NewNonNull(graphql.ID),
+			"input": &graphql.ArgumentConfig{ // Wrap it in a FieldConfigArgument
+				Type:        graphql.NewNonNull(adminUserReusables.AdminUserInputDef), // Use the InputObject here
+				Description: "Input for creating an admin user",                       // Description for the "input" argument
 			},
 		},
 		Resolve: repository.GetAdminUser,

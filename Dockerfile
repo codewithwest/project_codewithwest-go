@@ -2,17 +2,15 @@ FROM golang:1.24-alpine
 
 WORKDIR /app
 
-RUN apk add --no-cache nodejs npm
-RUN npm install -g nodemon
+RUN go install github.com/air-verse/air@latest
 
 COPY go.mod go.sum ./
-RUN go mod download
+
+RUN go mod download;  \
+    go mod tidy
 
 COPY . .
 
-  #go build -o main ./main.go
-
 EXPOSE 3071
 
-# Corrected CMD instruction:
-CMD ["sh", "-c", "while true; do go run main.go; sleep 1; done"]
+CMD ["air"]

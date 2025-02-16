@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"go_server/handler"
 	"log"
 	"net/http"
@@ -25,7 +26,7 @@ func main() {
 
 	// Start the server in a goroutine so it doesn't block
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed { // Use the srv instance
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) { // Use the srv instance
 			log.Fatalf("ListenAndServe error: %v", err)
 		}
 	}()
