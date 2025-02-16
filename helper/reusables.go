@@ -2,7 +2,6 @@ package helper
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"log"
 	"net/mail"
 	"os"
@@ -16,10 +15,14 @@ func ValidateEmailAddress(email string) (bool, error) {
 }
 
 func GetEnvVariable(searchValue string) string {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	//err := godotenv.Load()
+	//if err != nil {
+	//	log.Fatal("Error loading .env file")
+	//}
 	resolvedValue := os.Getenv(searchValue)
+
+	if resolvedValue == "" {
+		log.Fatal(searchValue + " environment variable not set")
+	}
 	return resolvedValue
 }
