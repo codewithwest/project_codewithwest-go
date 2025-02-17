@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/graphql-go/graphql"
-	"go_server/repository"
+	"go_server/repository/queries"
 )
 
 func GetUserSchema(userType *graphql.Object) *graphql.Field {
@@ -14,7 +14,7 @@ func GetUserSchema(userType *graphql.Object) *graphql.Field {
 				Type: graphql.NewNonNull(graphql.ID),
 			},
 		},
-		Resolve: repository.GetUser,
+		Resolve: queries.GetUser,
 	}
 }
 
@@ -27,6 +27,6 @@ func GetUsersSchema(userType *graphql.Object) *graphql.Field {
 				Type: graphql.Int,
 			},
 		},
-		Resolve: repository.GetUsers,
+		Resolve: queries.GetUsers,
 	}
 }

@@ -8,11 +8,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go_server/helper"
 	"go_server/helper/adminUserReusables"
+	"go_server/helper/mongoDB"
 	"log"
 	"time"
 )
-
-var nextUserID = 1
 
 func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	userValues, validationError := adminUserReusables.ValidateAdminUserInput(
@@ -24,7 +23,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	password := userValues[1]
 	username := userValues[2]
 
-	err := helper.ConnectMongoDB(
+	err := mongoDB.ConnectMongoDB(
 		helper.GetEnvVariable("MONGO_DB_URL"),
 		"codewithwest",
 		"admin_users") // Replace placeholders
@@ -36,21 +35,28 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	if !isPassword {
 		return nil, fmt.Errorf("oops! something went wrong on ourder side while creating your password! Please contact support")
 	}
-	//newUser
-	//
-	//:= &adminUserReusables.AdminUserInput{
-	//	ID:       nextUserID,
-	//	UserName: username,
-	//	Email:    email,
-	//	Password: &hashedPassword,
-	//}
 
-	user := NewAdminUser(username, email, hashedPassword)
+	emailExist, isEmailExists := mongoDB.EmailExist(
+		mongoDB.RetrievedCollection, email)
+
+	if isEmailExists != nil {
+		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID", isEmailExists)
+	}
+	if emailExist {
+		return nil, fmt.Errorf("email already exists")
+	}
+
+	userId, userIdError := mongoDB.GetHighestIdInCollection(mongoDB.RetrievedCollection)
+	if userIdError != nil {
+		return nil, userIdError
+	}
+
+	user := adminUserReusables.NewAdminUser(userId, username, email, hashedPassword)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	result, err := helper.RetrievedCollection.InsertOne(ctx, user)
+	result, err := mongoDB.RetrievedCollection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
@@ -65,26 +71,11 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	// Adjust type assertion if needed
 	var createdUser adminUserReusables.AdminUserInputMongo
-	err = helper.RetrievedCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&createdUser)
+	err = mongoDB.RetrievedCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&createdUser)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve created user: %w", err)
 	}
 
 	return createdUser, nil
 
-}
-
-func NewAdminUser(username string, email string, password string) *adminUserReusables.AdminUserInputMongo {
-	return &adminUserReusables.AdminUserInputMongo{
-
-		UserName:  username,
-		Email:     email,
-		Password:  &password,
-		Role:      "administrator",
-		Type:      "user",
-		Status:    "active",
-		CreatedAt: time.Now().Format("2027-02-12 15:04:05"),
-		UpdatedAt: time.Now().Format("2027-02-12 15:04:05"),
-		LastLogin: nil,
-	}
 }

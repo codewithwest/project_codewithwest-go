@@ -52,4 +52,19 @@ func ValidateAdminUserInput(params graphql.ResolveParams) ([]string, error) {
 	return []string{email, password, username}, nil
 }
 
+func NewAdminUser(userId int, username string, email string, password string) *AdminUserInputMongo {
+	return &AdminUserInputMongo{
+		ID:        userId + 1,
+		UserName:  username,
+		Email:     email,
+		Password:  &password,
+		Role:      "administrator",
+		Type:      "user",
+		Status:    "active",
+		CreatedAt: helper.GetCurrentDateTime(),
+		UpdatedAt: helper.GetCurrentDateTime(),
+		LastLogin: nil,
+	}
+}
+
 var AdminUserInputDef = GetAdminUserInput()

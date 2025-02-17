@@ -20,24 +20,3 @@ func CreateUserMutation(requiredType *graphql.Object) *graphql.Field {
 		Resolve: mutations.CreateAdminUser,
 	}
 }
-
-//type adminUserType struct {
-//	ID       int    `json:"id"`
-//	UserName string `json:"name"`
-//	Email    string `json:"email"`
-//}
-//
-//var users []adminUserType // In-memory slice for demonstration.  Replace with DB interaction.
-//var nextUserID = 1
-//
-//func CreateUser(ctx context.Context, input adminUserType) (*adminUserType, error) {
-//	newUser := &adminUserType{
-//		ID:       nextUserID,
-//		UserName: input.UserName,
-//		Email:    input.Email,
-//	}
-//	users = append(users, *newUser)
-//	nextUserID++
-//
-//	return newUser, nil
-//}

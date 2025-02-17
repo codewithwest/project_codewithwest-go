@@ -1,4 +1,4 @@
-package repository
+package queries
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go_server/helper"
 	"go_server/helper/adminUserReusables"
+	"go_server/helper/mongoDB"
 	"log"
 	"strconv"
 	"time"
@@ -15,7 +16,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func GetAdminUser(params graphql.ResolveParams) (interface{}, error) {
+func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	// In a real application, you would typically fetch the user data from a database or other data source
 	inputArg, isInput := params.Args["input"].(map[string]interface{})
 	if !isInput {
@@ -30,7 +31,7 @@ func GetAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("invalid email or password" + username + password)
 	}
 
-	err := helper.ConnectMongoDB(
+	err := mongoDB.ConnectMongoDB(
 		helper.GetEnvVariable("MONGO_DB_URL"),
 		"codewithwest",
 		"admin_users")
@@ -43,9 +44,13 @@ func GetAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	var adminUser adminUserReusables.AdminUserInputMongo
 
-	findOneError := helper.RetrievedCollection.FindOne(
+	findOneError := mongoDB.RetrievedCollection.FindOne(
 		ctx, bson.M{"email": email}).Decode(&adminUser)
-
+	fmt.Println("password compared with adminUser" + password + "second: " + *adminUser.Password)
+	passwordInvalid := helper.CheckPasswordHash(password, *adminUser.Password)
+	if !passwordInvalid {
+		return nil, fmt.Errorf("invalid email or password combination")
+	}
 	if findOneError != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
 			return nil, nil
@@ -80,8 +85,8 @@ func NewRandomAdminUser(id string) adminUserReusables.AdminUser {
 		Role:      "user",
 		Type:      "user",
 		Status:    "active",
-		CreatedAt: time.Now().Format("14-02-2027 15:04:05"),
-		UpdatedAt: time.Now().Format("14-02-2027 15:04:05"),
-		LastLogin: time.Now().Format("14-02-2027 15:04:05"),
+		CreatedAt: helper.GetCurrentDateTime(),
+		UpdatedAt: helper.GetCurrentDateTime(),
+		LastLogin: helper.GetCurrentDateTime(),
 	}
 }

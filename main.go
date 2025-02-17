@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go_server/handler"
+	"go_server/helper"
 	"log"
 	"net/http"
 	"os"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 	log.Println("Local server started in on port https://localhost:3072")
-
+	helper.GetCurrentDateTime()
 	// Create a new HTTP server instance
 	srv := &http.Server{Addr: ":3072", Handler: nil} // Handler is nil here; use http.HandleFunc
 

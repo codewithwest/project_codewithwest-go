@@ -14,10 +14,10 @@ func GetSchema() (graphql.Schema, error) {
 		Query: graphql.NewObject(graphql.ObjectConfig{
 			Name: "Query",
 			Fields: graphql.Fields{
-				"getUser":       user.GetUserSchema(userType),
-				"getUsers":      user.GetUsersSchema(userType),
-				"getAdminUser":  admin.GetAdminUserSchema(adminUserType),
-				"getAdminUsers": admin.GetAdminUsersSchema(adminUserType),
+				"getUser":        user.GetUserSchema(userType),
+				"getUsers":       user.GetUsersSchema(userType),
+				"loginAdminUser": admin.GetLoginAdminUserSchema(adminUserType),
+				"getAdminUsers":  admin.GetAdminUsersSchema(adminUserType),
 			},
 		}),
 		Mutation: graphql.NewObject(graphql.ObjectConfig{
