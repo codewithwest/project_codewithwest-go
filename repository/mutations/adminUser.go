@@ -24,7 +24,10 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	password := userValues[1]
 	username := userValues[2]
 
-	err := helper.ConnectMongoDB("mongodb://project_velocity-knight-trainer-server-knight_trainer-db-1:27017", "codewithwest", "admin_users") // Replace placeholders
+	err := helper.ConnectMongoDB(
+		helper.GetEnvVariable("MONGO_DB_URL"),
+		"codewithwest",
+		"admin_users") // Replace placeholders
 	if err != nil {
 		log.Fatal(err)
 	}
