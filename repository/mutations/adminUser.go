@@ -36,14 +36,16 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	if !isPassword {
 		return nil, fmt.Errorf("oops! something went wrong on ourder side while creating your password! Please contact support")
 	}
-	newUser := &adminUserReusables.AdminUserInput{
-		ID:       nextUserID,
-		UserName: username,
-		Email:    email,
-		Password: &hashedPassword,
-	}
+	//newUser
+	//
+	//:= &adminUserReusables.AdminUserInput{
+	//	ID:       nextUserID,
+	//	UserName: username,
+	//	Email:    email,
+	//	Password: &hashedPassword,
+	//}
 
-	user := newUser
+	user := NewAdminUser(username, email, hashedPassword)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -70,4 +72,19 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	return createdUser, nil
 
+}
+
+func NewAdminUser(username string, email string, password string) *adminUserReusables.AdminUserInputMongo {
+	return &adminUserReusables.AdminUserInputMongo{
+
+		UserName:  username,
+		Email:     email,
+		Password:  &password,
+		Role:      "administrator",
+		Type:      "user",
+		Status:    "active",
+		CreatedAt: time.Now().Format("2027-02-12 15:04:05"),
+		UpdatedAt: time.Now().Format("2027-02-12 15:04:05"),
+		LastLogin: nil,
+	}
 }
