@@ -7,7 +7,7 @@ import (
 	"github.com/graphql-go/graphql"
 )
 
-func CreateUserMutation(requiredType *graphql.Object) *graphql.Field {
+func CreateAdminUserMutation(requiredType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
 		Type:        requiredType, // Return the user type after creation
 		Description: "Create a new admin user",

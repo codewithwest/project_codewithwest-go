@@ -31,7 +31,7 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("invalid email or password" + username + password)
 	}
 
-	err := mongoDB.ConnectMongoDB(
+	collection, err := mongoDB.ConnectMongoDB(
 		helper.GetEnvVariable("MONGO_DB_URL"),
 		"codewithwest",
 		"admin_users")
@@ -44,9 +44,8 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	var adminUser adminUserReusables.AdminUserInputMongo
 
-	findOneError := mongoDB.RetrievedCollection.FindOne(
+	findOneError := collection.FindOne(
 		ctx, bson.M{"email": email}).Decode(&adminUser)
-	fmt.Println("password compared with adminUser" + password + "second: " + *adminUser.Password)
 	passwordInvalid := helper.CheckPasswordHash(password, *adminUser.Password)
 	if !passwordInvalid {
 		return nil, fmt.Errorf("invalid email or password combination")

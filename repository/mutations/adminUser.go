@@ -23,7 +23,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	password := userValues[1]
 	username := userValues[2]
 
-	err := mongoDB.ConnectMongoDB(
+	collection, err := mongoDB.ConnectMongoDB(
 		helper.GetEnvVariable("MONGO_DB_URL"),
 		"codewithwest",
 		"admin_users") // Replace placeholders
@@ -37,7 +37,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	}
 
 	emailExist, isEmailExists := mongoDB.EmailExist(
-		mongoDB.RetrievedCollection, email)
+		collection, email)
 
 	if isEmailExists != nil {
 		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID", isEmailExists)
@@ -46,7 +46,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("email already exists")
 	}
 
-	userId, userIdError := mongoDB.GetHighestIdInCollection(mongoDB.RetrievedCollection)
+	userId, userIdError := mongoDB.GetHighestIdInCollection(collection)
 	if userIdError != nil {
 		return nil, userIdError
 	}
@@ -56,7 +56,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	result, err := mongoDB.RetrievedCollection.InsertOne(ctx, user)
+	result, err := collection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
@@ -71,7 +71,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	// Adjust type assertion if needed
 	var createdUser adminUserReusables.AdminUserInputMongo
-	err = mongoDB.RetrievedCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&createdUser)
+	err = collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&createdUser)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve created user: %w", err)
 	}

@@ -10,24 +10,24 @@ import (
 	"go_server/helper/adminUserReusables"
 )
 
-var RetrievedCollection *mongo.Collection
+//var RetrievedCollection *mongo.Collection
 
-func ConnectMongoDB(uri, databaseName, collectionName string) error {
+func ConnectMongoDB(uri, databaseName, collectionName string) (*mongo.Collection, error) {
 	clientOptions := options.Client().ApplyURI(uri)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		return fmt.Errorf("failed to connect to MongoDB: %w", err)
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
 
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
-		return fmt.Errorf("failed to ping MongoDB: %w", err)
+		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
-
-	RetrievedCollection = client.Database(databaseName).Collection(collectionName)
+	var collection *mongo.Collection
+	collection = client.Database(databaseName).Collection(collectionName)
 
 	fmt.Println("Connected to MongoDB!")
-	return nil
+	return collection, nil
 }
 
 func CreateIndex(collection *mongo.Collection, indexValue string) (*string, error) {
@@ -87,5 +87,27 @@ func EmailExist(collection *mongo.Collection, email string) (bool, error) {
 	}
 
 	return true, nil
+}
 
+func NameExists(collection *mongo.Collection, name string) (bool, error) {
+	_, createNameIndexError := CreateIndex(collection, "name")
+	if createNameIndexError != nil {
+		return false, createNameIndexError
+	}
+
+	filter := bson.M{"name": name} // Create a filter for the email
+
+	var result struct {
+		Name string `bson:"name"` // Only need the email field in the result
+	}
+
+	err := collection.FindOne(context.Background(), filter).Decode(&result)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return false, nil
+		}
+		return false, fmt.Errorf("checking email existence: %w", err) // Other error
+	}
+
+	return true, nil
 }
