@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/graphql-go/graphql"
-	"go_server/repository/queries"
+	"go_server/resolver/queries"
 )
 
 func GetUserSchema(userType *graphql.Object) *graphql.Field {

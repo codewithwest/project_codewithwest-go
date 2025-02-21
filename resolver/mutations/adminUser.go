@@ -79,3 +79,54 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	return createdUser, nil
 
 }
+
+func CreateAdminUserRequest(params graphql.ResolveParams) (interface{}, error) {
+	email, isEmail := params.Args["email"].(string)
+
+	if !isEmail {
+		return nil, fmt.Errorf("missing required argument(s)")
+	}
+	_, err := helper.ValidateEmailAddress(email)
+	if err != nil {
+		return nil, err
+	}
+
+	collection, err := mongoDB.ConnectMongoDB(
+		helper.GetEnvVariable("MONGO_DB_URL"),
+		"codewithwest",
+		"admin_user_request") // Replace placeholders
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userId, userIdError := mongoDB.GetHighestIdInCollection(collection)
+	if userIdError != nil {
+		return nil, userIdError
+	}
+
+	emailExist, isEmailExists := mongoDB.EmailExist(
+		collection, email)
+
+	if isEmailExists != nil {
+		return nil, fmt.Errorf("failed to convert inserted id to objectId %s", isEmailExists)
+	}
+	if emailExist {
+		return nil, fmt.Errorf("email already exists")
+	}
+
+	newRequestUser := adminUserReusables.AdminUserRequest{
+		ID:        userId + 1,
+		Email:     email,
+		CreatedAt: helper.GetCurrentDateTime(),
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	_, err = collection.InsertOne(ctx, newRequestUser)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create user: %w", err)
+	}
+
+	return newRequestUser, nil
+}

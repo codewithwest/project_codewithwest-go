@@ -2,7 +2,7 @@ package admin
 
 import (
 	"go_server/helper/adminUserReusables"
-	"go_server/repository/mutations"
+	"go_server/resolver/mutations"
 
 	"github.com/graphql-go/graphql"
 )
@@ -18,5 +18,19 @@ func CreateAdminUserMutation(requiredType *graphql.Object) *graphql.Field {
 			},
 		},
 		Resolve: mutations.CreateAdminUser,
+	}
+}
+
+func RequestAdminAccess(requiredType *graphql.Object) *graphql.Field {
+	return &graphql.Field{
+		Name:        "AdminUserRequestInput",
+		Type:        requiredType,
+		Description: "Request admin access",
+		Args: graphql.FieldConfigArgument{
+			"email": &graphql.ArgumentConfig{
+				Type: graphql.NewNonNull(graphql.String),
+			},
+		},
+		Resolve: mutations.CreateAdminUserRequest,
 	}
 }

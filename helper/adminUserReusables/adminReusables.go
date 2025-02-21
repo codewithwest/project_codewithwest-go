@@ -27,6 +27,18 @@ func GetAdminUserInput() *graphql.InputObject { // Return *graphql.InputObject
 	})
 }
 
+func GetAdminUserRequestInput() *graphql.InputObject {
+	return graphql.NewInputObject(graphql.InputObjectConfig{
+		Name:        "AdminUserRequestInput",
+		Description: "Input for creating a new admin user request",
+		Fields: graphql.InputObjectConfigFieldMap{
+			"email": &graphql.InputObjectFieldConfig{
+				Type: graphql.NewNonNull(graphql.String),
+			},
+		},
+	})
+}
+
 func ValidateAdminUserInput(params graphql.ResolveParams) ([]string, error) {
 	inputArg, isInput := params.Args["input"].(map[string]interface{})
 	if !isInput {

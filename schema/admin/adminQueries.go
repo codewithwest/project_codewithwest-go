@@ -3,7 +3,7 @@ package admin
 import (
 	"github.com/graphql-go/graphql"
 	"go_server/helper/adminUserReusables"
-	"go_server/repository/queries"
+	"go_server/resolver/queries"
 )
 
 func GetLoginAdminUserSchema(adminUserType *graphql.Object) *graphql.Field {

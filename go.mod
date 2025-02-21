@@ -4,6 +4,7 @@ go 1.22.2
 
 require (
 	github.com/graphql-go/handler v0.2.4
+	github.com/joho/godotenv v1.5.1
 	github.com/rs/zerolog v1.33.0
 	go.mongodb.org/mongo-driver v1.17.2
 	golang.org/x/crypto v0.33.0
@@ -11,7 +12,6 @@ require (
 
 require (
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect

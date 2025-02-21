@@ -19,6 +19,12 @@ type AdminUserInput struct {
 	Password *string `json:"password"`
 }
 
+type AdminUserRequest struct {
+	ID        int    `json:"id"`
+	Email     string `json:"email" bson:"email"`
+	CreatedAt string `json:"created_at" bson:"created_at"`
+}
+
 type AdminUserInputMongo struct {
 	ID        int     `json:"id" bson:"id"`
 	UserName  string  `json:"name" bson:"username"`

@@ -38,3 +38,21 @@ func GetAdminUserType() *graphql.Object {
 		},
 	)
 }
+
+func GetAdminUserRequestType() *graphql.Object {
+	return graphql.NewObject(
+		graphql.ObjectConfig{
+			Name: "AdminUserRequest",
+			Fields: graphql.Fields{
+				"id": &graphql.Field{
+					Type: graphql.String,
+				},
+				"email": &graphql.Field{
+					Type: graphql.String,
+				},
+				"created_at": &graphql.Field{
+					Type: graphql.String,
+				},
+			},
+		})
+}

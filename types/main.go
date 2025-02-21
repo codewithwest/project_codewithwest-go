@@ -10,6 +10,7 @@ import (
 func GetSchema() (graphql.Schema, error) {
 
 	var adminUserType = GetAdminUserType()
+	var adminUserRequestType = GetAdminUserRequestType()
 	var userType = GetUserType()
 	var projectCategoryType = GetProjectCategoryType()
 	var projectType = GetProjectType()
@@ -30,6 +31,7 @@ func GetSchema() (graphql.Schema, error) {
 				"createAdminUser":       admin.CreateAdminUserMutation(adminUserType),
 				"createProjectCategory": projects.CreateProjectCategoryMutation(projectCategoryType),
 				"createProject":         projects.CreateProjectMutation(projectType),
+				"requestAdminAccess":    admin.RequestAdminAccess(adminUserRequestType),
 			},
 		}),
 	})

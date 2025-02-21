@@ -3,7 +3,7 @@ package projects
 import (
 	"github.com/graphql-go/graphql"
 	"go_server/helper"
-	"go_server/repository/mutations"
+	"go_server/resolver/mutations"
 )
 
 func CreateProjectCategoryMutation(requiredType *graphql.Object) *graphql.Field {
