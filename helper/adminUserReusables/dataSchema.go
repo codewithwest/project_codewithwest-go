@@ -20,7 +20,7 @@ type AdminUserInput struct {
 }
 
 type AdminUserRequest struct {
-	ID        int    `json:"id"`
+	ID        int    `json:"id" bson:"id"`
 	Email     string `json:"email" bson:"email"`
 	CreatedAt string `json:"created_at" bson:"created_at"`
 }

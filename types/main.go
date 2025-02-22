@@ -19,19 +19,22 @@ func GetSchema() (graphql.Schema, error) {
 		Query: graphql.NewObject(graphql.ObjectConfig{
 			Name: "Query",
 			Fields: graphql.Fields{
-				"getUser":        user.GetUserSchema(userType),
-				"getUsers":       user.GetUsersSchema(userType),
-				"loginAdminUser": admin.GetLoginAdminUserSchema(adminUserType),
-				"getAdminUsers":  admin.GetAdminUsersSchema(adminUserType),
+				"getUser":                    user.GetUserSchema(userType),
+				"getUsers":                   user.GetUsersSchema(userType),
+				"loginAdminUser":             admin.GetLoginAdminUserSchema(adminUserType),
+				"getAdminUsers":              admin.GetAdminUsersSchema(adminUserType),
+				"getAdminUserAccessRequests": admin.GetAdminUserRequests(adminUserRequestType),
+				"getProjects":                projects.GetProjects(projectType),
+				"getProjectCategories":       projects.GetProjectCategories(projectCategoryType),
 			},
 		}),
 		Mutation: graphql.NewObject(graphql.ObjectConfig{
 			Name: "Mutation",
 			Fields: graphql.Fields{
-				"createAdminUser":       admin.CreateAdminUserMutation(adminUserType),
-				"createProjectCategory": projects.CreateProjectCategoryMutation(projectCategoryType),
-				"createProject":         projects.CreateProjectMutation(projectType),
-				"requestAdminAccess":    admin.RequestAdminAccess(adminUserRequestType),
+				"createAdminUser":        admin.CreateAdminUserMutation(adminUserType),
+				"createProjectCategory":  projects.CreateProjectCategoryMutation(projectCategoryType),
+				"createProject":          projects.CreateProjectMutation(projectType),
+				"adminUserAccessRequest": admin.RequestAdminAccess(adminUserRequestType),
 			},
 		}),
 	})

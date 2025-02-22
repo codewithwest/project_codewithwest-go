@@ -40,3 +40,5 @@ func NewProjectCategory(id int, name string) ProjectCategoryMongo {
 		UpdatedAt: GetCurrentDateTime(),
 	}
 }
+
+var ProjectInput = GetProjectInput()

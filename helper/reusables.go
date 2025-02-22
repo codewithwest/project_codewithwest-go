@@ -36,12 +36,10 @@ func GetCurrentDateTime() string {
 	local, err := time.LoadLocation("Local") // Or specify a specific location like "Africa/Johannesburg"
 	if err != nil {
 		fmt.Println("Error loading location:", err)
-
 		return resolvedTime.Format("02-01-2006 15:04:05")
 
 	} else {
 		currentTime := resolvedTime.In(local)
-
 		return currentTime.Format("02-01-2006 15:04:05")
 	}
 

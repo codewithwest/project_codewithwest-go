@@ -32,7 +32,7 @@ func GetProjectType() *graphql.Object {
 				"id": &graphql.Field{
 					Type: graphql.Int,
 				},
-				"project_id": &graphql.Field{
+				"project_category_id": &graphql.Field{
 					Type: graphql.Int,
 				},
 				"name": &graphql.Field{

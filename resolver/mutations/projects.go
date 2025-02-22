@@ -137,11 +137,11 @@ func CreateProject(params graphql.ResolveParams) (interface{}, error) {
 		Name:              name,
 		Description:       description,
 		TechStacks:        techStacksList,
-		GithubLink:        "https://github.com",
-		LiveLink:          "https://live.com",
-		TestLink:          "https://test.com",
-		CreatedAt:         "2021-01-01",
-		UpdatedAt:         "2021-01-01",
+		GithubLink:        inputArg["github_link"].(string),
+		LiveLink:          inputArg["live_link"].(string),
+		TestLink:          inputArg["test_link"].(string),
+		CreatedAt:         helper.GetCurrentDateTime(),
+		UpdatedAt:         helper.GetCurrentDateTime(),
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()

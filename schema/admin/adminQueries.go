@@ -32,3 +32,17 @@ func GetAdminUsersSchema(adminUserType *graphql.Object) *graphql.Field {
 		Resolve: queries.GetAdminUsers,
 	}
 }
+
+func GetAdminUserRequests(adminUserType *graphql.Object) *graphql.Field {
+	return &graphql.Field{
+		Name: "AdminUserRequest",
+		Type: graphql.NewList(adminUserType),
+		Args: graphql.FieldConfigArgument{
+			"limit": &graphql.ArgumentConfig{
+				Type: graphql.Int,
+			},
+		},
+		Resolve:     queries.GetAdminUserRequests,
+		Description: "Get all admin user requests",
+	}
+}

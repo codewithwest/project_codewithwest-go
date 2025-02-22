@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"go_server/helper"
 	"go_server/helper/adminUserReusables"
 	"go_server/helper/mongoDB"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/graphql-go/graphql"
@@ -66,26 +66,82 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("missing limit Argument")
 	}
 
-	var users []adminUserReusables.AdminUser
-
-	for userId := 0; userId < limit; userId++ {
-
-		users = append(users, NewRandomAdminUser(strconv.Itoa(userId)))
+	collection, err := mongoDB.ConnectMongoDB(
+		helper.GetEnvVariable("MONGO_DB_URL"),
+		"codewithwest",
+		"admin_users")
+	if err != nil {
+		log.Fatal(err)
 	}
-	return users, nil
 
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	findOptions := options.Find().SetLimit(int64(limit))
+	cursor, err := collection.Find(ctx, bson.D{}, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+
+		}
+	}(cursor, context.Background())
+
+	var adminUsers []adminUserReusables.AdminUserInputMongo
+	for cursor.Next(context.Background()) {
+		var doc adminUserReusables.AdminUserInputMongo
+		if err := cursor.Decode(&doc); err != nil {
+			return nil, err
+		}
+		adminUsers = append(adminUsers, doc)
+	}
+	if err := cursor.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return adminUsers, nil
 }
 
-func NewRandomAdminUser(id string) adminUserReusables.AdminUser {
-	return adminUserReusables.AdminUser{
-		ID:        id,
-		Username:  "user" + id,
-		Email:     "user" + id + "@example.com",
-		Role:      "user",
-		Type:      "user",
-		Status:    "active",
-		CreatedAt: helper.GetCurrentDateTime(),
-		UpdatedAt: helper.GetCurrentDateTime(),
-		LastLogin: helper.GetCurrentDateTime(),
+func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
+	limit, ok := params.Args["limit"].(int)
+	if !ok {
+		return nil, fmt.Errorf("missing limit Argument")
 	}
+
+	collection, err := mongoDB.ConnectMongoDB(
+		helper.GetEnvVariable("MONGO_DB_URL"),
+		"codewithwest",
+		"admin_user_request")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	findOptions := options.Find().SetLimit(int64(limit))
+	cursor, err := collection.Find(ctx, bson.D{}, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+
+		}
+	}(cursor, context.Background())
+
+	var adminUserRequests []adminUserReusables.AdminUserRequest
+	for cursor.Next(context.Background()) {
+		var doc adminUserReusables.AdminUserRequest
+		if err := cursor.Decode(&doc); err != nil {
+			return nil, err
+		}
+		adminUserRequests = append(adminUserRequests, doc)
+	}
+	if err := cursor.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return adminUserRequests, nil
 }

@@ -26,7 +26,7 @@ func CreateProjectMutation(requiredType *graphql.Object) *graphql.Field {
 		Description: "Create a new project",
 		Args: graphql.FieldConfigArgument{
 			"input": &graphql.ArgumentConfig{
-				Type:        graphql.NewNonNull(helper.GetProjectInput()),
+				Type:        graphql.NewNonNull(helper.ProjectInput),
 				Description: "Project input",
 			},
 		},
