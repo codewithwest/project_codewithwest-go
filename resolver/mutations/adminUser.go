@@ -14,6 +14,7 @@ import (
 )
 
 func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
+
 	userValues, validationError := adminUserReusables.ValidateAdminUserInput(
 		params)
 	if validationError != nil {
@@ -26,14 +27,14 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	collection, err := mongoDB.ConnectMongoDB(
 		helper.GetEnvVariable("MONGO_DB_URL"),
 		"codewithwest",
-		"admin_users") // Replace placeholders
+		"admin_users")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	hashedPassword, isPassword := helper.HashPassword(password)
 	if !isPassword {
-		return nil, fmt.Errorf("oops! something went wrong on ourder side while creating your password! Please contact support")
+		return nil, fmt.Errorf("oops! something went wrong on our side while creating your password! Please contact support")
 	}
 
 	emailExist, isEmailExists := mongoDB.EmailExist(

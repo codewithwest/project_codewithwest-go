@@ -26,7 +26,6 @@ func ConnectMongoDB(uri, databaseName, collectionName string) (*mongo.Collection
 	var collection *mongo.Collection
 	collection = client.Database(databaseName).Collection(collectionName)
 
-	fmt.Println("Connected to MongoDB!")
 	return collection, nil
 }
 

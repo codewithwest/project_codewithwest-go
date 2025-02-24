@@ -17,7 +17,6 @@ import (
 )
 
 func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
-	// In a real application, you would typically fetch the user data from a database or other data source
 	inputArg, isInput := params.Args["input"].(map[string]interface{})
 	if !isInput {
 		return nil, fmt.Errorf("invalid Input arguments")
@@ -35,7 +34,9 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		helper.GetEnvVariable("MONGO_DB_URL"),
 		"codewithwest",
 		"admin_users")
+
 	if err != nil {
+		return nil, fmt.Errorf(" ", err)
 		log.Fatal(err)
 	}
 
@@ -46,15 +47,22 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	findOneError := collection.FindOne(
 		ctx, bson.M{"email": email}).Decode(&adminUser)
+
+	if adminUser.Password == nil {
+		return nil, fmt.Errorf("invalid email or password combination")
+	}
+
 	passwordInvalid := helper.CheckPasswordHash(password, *adminUser.Password)
 	if !passwordInvalid {
 		return nil, fmt.Errorf("invalid email or password combination")
 	}
+
 	if findOneError != nil {
 		if errors.Is(mongo.ErrNoDocuments, err) {
-			return nil, nil
+			return fmt.Errorf("Incorrect Email and Password combination"), nil
 		}
-		return nil, fmt.Errorf("failed to retrieve user: %w", findOneError)
+		// log.("failed to retrieve user: %w", findOneError)
+		return nil, fmt.Errorf("Oops looks like an error occurred on our side if the error continues contact support or create new account if you don't already have one please reset your password")
 	}
 
 	return adminUser, nil
