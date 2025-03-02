@@ -20,10 +20,12 @@ func init() {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
+
 	ctx := r.Context()
 	ctx = context.WithValue(ctx, "logger", LOGGER)
 
-	//types := schema.GetAllTypes()
+	w.Header().Set("Content-Type", "application/json")
 
 	schemaObj, err := types.GetSchema()
 	if err != nil {
@@ -35,7 +37,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	mainController := &api.MainController{Schema: schemaObj}
 
 	router := mux.NewRouter()
-	router.Handle("/graphql", mainController.GetData())
+	router.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+		mainController.GetData().ServeHTTP(w, r)
+	}).Methods("GET", "POST", "OPTIONS") // Explicitly allow OPTIONS
+	router.ServeHTTP(w, r)
+}
 
-	router.ServeHTTP(w, r) // Use the router to serve the request
+func enableCors(w *http.ResponseWriter) {
+	header := (*w).Header()
+	header.Add("Access-Control-Allow-Origin", "http://localhost:3002")
+	header.Add("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
+	header.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, signature, user_id") // Add "signature"
+	header.Add("Access-Control-Allow-Credentials", "true")
 }

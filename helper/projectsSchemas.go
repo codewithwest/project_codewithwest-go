@@ -1,18 +1,5 @@
 package helper
 
-//type Project struct {
-//	ID                int      `json:"id"`
-//	ProjectCategoryId int      `json:"project_category_id"`
-//	Name              string   `json:"name"`
-//	Description       string   `json:"description"`
-//	TechStacks        []string `json:"tech_stacks"`
-//	GithubLink        string   `json:"github_link"`
-//	LiveLink          string   `json:"live_link"`
-//	TestLink          string   `json:"test_link"`
-//	CreatedAt         string   `json:"created_at"`
-//	UpdatedAt         string   `json:"updated_at"`
-//}
-
 type ProjectCategory struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
@@ -22,7 +9,7 @@ type ProjectCategory struct {
 
 type ProjectMongo struct {
 	ID                int      `json:"id" bson:"id"`
-	ProjectCategoryId int      `json:"project_id" bson:"project_id"`
+	ProjectCategoryId int      `json:"project_category_id" bson:"project_category_id"`
 	Name              string   `json:"name" bson:"name"`
 	Description       string   `json:"description" bson:"description"`
 	TechStacks        []string `json:"tech_stacks" bson:"tech_stacks"`
