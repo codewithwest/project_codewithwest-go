@@ -51,10 +51,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func enableCors(w *http.ResponseWriter) {
 	allowedOrigins := helper.GetEnvVariable("ALLOWED_ORIGINS")
-        origins := strings.Split(allowedOrigins, ",")
+        // origins := strings.Split(allowedOrigins, ",")
 	header := (*w).Header()
 	
-	header.Add("Access-Control-Allow-Origin", origins)
+	header.Add("Access-Control-Allow-Origin", allowedOrigins)
 	header.Add("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
 	header.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, signature, user_id") // Add "signature"
 	header.Add("Access-Control-Allow-Credentials", "true")
