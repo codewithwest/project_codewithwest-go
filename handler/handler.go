@@ -7,7 +7,6 @@ import (
 	"go_server/types"
 	"net/http"
 	"os"
-	"strings"
 	
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
