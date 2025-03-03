@@ -40,6 +40,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	router := mux.NewRouter()
 	router.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "OPTIONS" {
+		 	LOGGER.Info().Msg("OPTIONS request received")
 			w.WriteHeader(http.StatusOK)
 			return
 		}
