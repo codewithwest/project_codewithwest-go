@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go_server/helper"
 	"go_server/helper/adminUserReusables"
 	"go_server/helper/mongoDB"
 	"log"
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/graphql-go/graphql"
 )
@@ -30,14 +31,10 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("invalid email or password" + username + password)
 	}
 
-	collection, err := mongoDB.ConnectMongoDB(
-		helper.GetEnvVariable("MONGO_DB_URL"),
-		"codewithwest",
-		"admin_users")
+	collection, err := mongoDB.ConnectMongoDB("admin_users")
 
 	if err != nil {
 		return nil, fmt.Errorf(" ", err)
-		log.Fatal(err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
@@ -52,20 +49,28 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("invalid email or password combination")
 	}
 
-	passwordInvalid := helper.CheckPasswordHash(password, *adminUser.Password)
+	passwordInvalid := helper.ValidatePassword(password, *adminUser.Password)
 	if !passwordInvalid {
 		return nil, fmt.Errorf("invalid email or password combination")
 	}
 
 	if findOneError != nil {
-		if errors.Is(mongo.ErrNoDocuments, err) {
-			return fmt.Errorf("Incorrect Email and Password combination"), nil
+		if errors.Is(findOneError, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("incorrect Email and Password combination")
 		}
-		// log.("failed to retrieve user: %w", findOneError)
-		return nil, fmt.Errorf("Oops looks like an error occurred on our side if the error continues contact support or create new account if you don't already have one please reset your password")
+
+		return nil, fmt.Errorf("oops looks like an error occurred on our side, if the error continues contact support or create new account if you don't already have one please reset your password")
 	}
 
-	return adminUser, nil
+	session, err := mongoDB.CreateSession(string(rune(adminUser.ID)))
+	if err != nil {
+		return nil, err
+	}
+
+	return map[string]interface{}{
+		"token": session.Token,
+	}, nil
+
 }
 
 func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
@@ -74,10 +79,8 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("missing limit Argument")
 	}
 
-	collection, err := mongoDB.ConnectMongoDB(
-		helper.GetEnvVariable("MONGO_DB_URL"),
-		"codewithwest",
-		"admin_users")
+	collection, err := mongoDB.ConnectMongoDB("admin_users")
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -98,6 +101,7 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 	}(cursor, context.Background())
 
 	var adminUsers []adminUserReusables.AdminUserInputMongo
+
 	for cursor.Next(context.Background()) {
 		var doc adminUserReusables.AdminUserInputMongo
 		if err := cursor.Decode(&doc); err != nil {
@@ -108,6 +112,7 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
 	}
+
 	return adminUsers, nil
 }
 
@@ -118,9 +123,8 @@ func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
 	}
 
 	collection, err := mongoDB.ConnectMongoDB(
-		helper.GetEnvVariable("MONGO_DB_URL"),
-		"codewithwest",
 		"admin_user_request")
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -148,8 +152,10 @@ func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
 		}
 		adminUserRequests = append(adminUserRequests, doc)
 	}
+
 	if err := cursor.Err(); err != nil {
 		log.Fatal(err)
 	}
+
 	return adminUserRequests, nil
 }

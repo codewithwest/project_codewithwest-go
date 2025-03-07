@@ -2,35 +2,32 @@ package handler
 
 import (
 	"context"
-	"go_server/api"
-	"go_server/helper"
-	"go_server/types"
-	"net/http"
-	"os"
-	
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
+	"go_server/api"
+	"go_server/helper/auth"
+	"go_server/schema"
+	"net/http"
+	"os"
 )
 
-var LOGGER zerolog.Logger
-
 func init() {
-	LOGGER = zerolog.New(os.Stdout).With().Timestamp().
+	auth.LOGGER = zerolog.New(os.Stdout).With().Timestamp().
 		Str("app", "codewithwest-go").
 		Logger().With().Caller().Logger()
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
+	auth.EnableCors(&w)
 
 	ctx := r.Context()
-	ctx = context.WithValue(ctx, "logger", LOGGER)
+	_ = context.WithValue(ctx, "logger", auth.LOGGER)
 
 	w.Header().Set("Content-Type", "application/json")
 
-	schemaObj, err := types.GetSchema()
+	schemaObj, err := schema.GetSchema()
 	if err != nil {
-		LOGGER.Err(err).Msg(err.Error())
+		auth.LOGGER.Err(err).Msg(err.Error())
 		http.Error(w, "Error getting schema", http.StatusInternalServerError)
 		return
 	}
@@ -38,24 +35,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	mainController := &api.MainController{Schema: schemaObj}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "OPTIONS" {
-		 	LOGGER.Info().Msg("OPTIONS request received")
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-		mainController.GetData().ServeHTTP(w, r)
-	}).Methods("GET", "POST", "OPTIONS") // Explicitly allow OPTIONS
-	router.ServeHTTP(w, r)
-}
+	router.HandleFunc("/graphql", auth.ValidateSession(
+		func(w http.ResponseWriter, r *http.Request) {
+			if r.Method == "OPTIONS" {
+				auth.LOGGER.Info().Msg("OPTIONS request received")
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			mainController.GetData().ServeHTTP(w, r)
+		})).Methods("GET", "POST", "OPTIONS")
 
-func enableCors(w *http.ResponseWriter) {
-	allowedOrigins := helper.GetEnvVariable("ALLOWED_ORIGINS")
-        // origins := strings.Split(allowedOrigins, ",")
-	header := (*w).Header()
-	
-	header.Add("Access-Control-Allow-Origin", allowedOrigins)
-	header.Add("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
-	header.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, signature, user_id") // Add "signature"
-	header.Add("Access-Control-Allow-Credentials", "true")
+	router.ServeHTTP(w, r)
 }

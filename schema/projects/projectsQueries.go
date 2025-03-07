@@ -1,8 +1,9 @@
 package projects
 
 import (
-	"github.com/graphql-go/graphql"
 	"go_server/resolver/queries"
+
+	"github.com/graphql-go/graphql"
 )
 
 func GetProjects(projectsType *graphql.Object) *graphql.Field {
