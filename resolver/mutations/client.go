@@ -3,15 +3,15 @@ package mutations
 import (
 	"context"
 	"fmt"
+	"github.com/graphql-go/graphql"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go_server/helper"
 	"go_server/helper/clientReusables"
 	"go_server/helper/mongoDB"
 	"log"
+	"strconv"
 	"time"
-
-	"github.com/graphql-go/graphql"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func CreateClient(params graphql.ResolveParams) (interface{}, error) {
@@ -22,7 +22,7 @@ func CreateClient(params graphql.ResolveParams) (interface{}, error) {
 		return nil, validationError
 	}
 	email := userValues[0]
-	password := userValues[2]
+	password := userValues[1]
 
 	collection, err := mongoDB.ConnectMongoDB("clients")
 	if err != nil {
@@ -74,7 +74,7 @@ func CreateClient(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("failed to retrieve created user: %w", err)
 	}
 
-	session, err := mongoDB.CreateSession(string(rune(clientInput.ID)))
+	session, err := mongoDB.CreateSession(strconv.Itoa(client.ID), email, true)
 	if err != nil {
 		return nil, err
 	}

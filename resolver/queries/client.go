@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"go_server/helper"
@@ -48,8 +49,9 @@ func AuthenticateClient(params graphql.ResolveParams) (interface{}, error) {
 	}
 
 	passwordInvalid := helper.ValidatePassword(password, *client.Password)
+
 	if !passwordInvalid {
-		return nil, fmt.Errorf("invalid email or password combination")
+		return nil, fmt.Errorf("invalid email or password combination Error")
 	}
 
 	if findOneError != nil {
@@ -60,7 +62,7 @@ func AuthenticateClient(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("oops looks like an error occurred on our side, if the error continues contact support or create new account if you don't already have one please reset your password")
 	}
 
-	session, err := mongoDB.CreateSession(string(rune(client.ID)))
+	session, err := mongoDB.CreateSession(strconv.Itoa(client.ID), email, true)
 	if err != nil {
 		return nil, err
 	}

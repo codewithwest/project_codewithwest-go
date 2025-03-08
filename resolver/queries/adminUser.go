@@ -8,6 +8,7 @@ import (
 	"go_server/helper/adminUserReusables"
 	"go_server/helper/mongoDB"
 	"log"
+	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -62,7 +63,7 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("oops looks like an error occurred on our side, if the error continues contact support or create new account if you don't already have one please reset your password")
 	}
 
-	session, err := mongoDB.CreateSession(string(rune(adminUser.ID)))
+	session, err := mongoDB.CreateSession(strconv.Itoa(adminUser.ID), email, false)
 	if err != nil {
 		return nil, err
 	}

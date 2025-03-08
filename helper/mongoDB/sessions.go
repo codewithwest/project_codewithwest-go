@@ -2,7 +2,9 @@ package mongoDB
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"go_server/helper"
 	"net/http"
 	"time"
 
@@ -11,11 +13,12 @@ import (
 )
 
 type Session struct {
-	ID        string    `bson:"_id"`
-	UserID    string    `bson:"user_id"`
-	Token     string    `bson:"token"`
-	CreatedAt time.Time `bson:"created_at"`
-	ExpiresAt time.Time `bson:"expires_at"`
+	ID        string    `json:"id" bson:"_id"`
+	UserID    string    `json:"user_id" bson:"user_id"`
+	Email     string    `json:"email" bson:"email"`
+	Token     string    `json:"token" bson:"token"`
+	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+	ExpiresAt time.Time `json:"expires_at" bson:"expires_at"`
 }
 
 func GetSessionFromRequest(r *http.Request) (*Session, error) {
@@ -50,7 +53,7 @@ func GetSessionFromRequest(r *http.Request) (*Session, error) {
 	return &session, nil
 }
 
-func CreateSession(userID string) (*Session, error) {
+func CreateSession(userID string, email string, year bool) (*Session, error) {
 	collection, err := ConnectMongoDB("sessions")
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to sessions collection: %w", err)
@@ -62,20 +65,67 @@ func CreateSession(userID string) (*Session, error) {
 		return nil, fmt.Errorf("failed to generate session token: %w", err)
 	}
 
-	session := &Session{
-		ID:        GenerateObjectID(),
-		UserID:    userID,
-		Token:     token,
-		CreatedAt: time.Now(),
-		ExpiresAt: time.Now().Add(24 * time.Hour), // Sessions expire after 24 hours
+	var ExpiresAt = time.Now().AddDate(0, 0, 14)
+	if year {
+		ExpiresAt = time.Now().AddDate(1, 0, 0)
 	}
 
-	_, err = collection.InsertOne(context.Background(), session)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create session: %w", err)
+	var existingSession Session
+
+	filter := bson.M{
+		"$or": []bson.M{
+			{"email": email},
+			{"userID": userID},
+		},
 	}
 
-	return session, nil
+	findSessionErr := collection.FindOne(context.Background(), filter).Decode(&existingSession)
+	if findSessionErr == nil {
+		// Session exists, update it
+		update := bson.M{
+			"$set": bson.M{
+				"token":      token,
+				"expires_at": ExpiresAt,
+				"last_login": helper.GetCurrentDateTime(),
+			},
+		}
+
+		updateResult, err := collection.UpdateOne(context.Background(), bson.M{"email": email}, update)
+		if err != nil {
+			return nil, fmt.Errorf("error updating session: %w", err)
+		}
+
+		if updateResult.ModifiedCount == 0 {
+			return nil, fmt.Errorf("no session updated")
+		}
+
+		existingSession.UserID = userID
+		existingSession.Token = token
+		existingSession.ExpiresAt = ExpiresAt
+
+		return &existingSession, nil
+
+	} else if errors.Is(findSessionErr, mongo.ErrNoDocuments) {
+		// Session doesn't exist, create a new one
+		session := &Session{
+			ID:        GenerateObjectID(),
+			UserID:    userID,
+			Email:     email,
+			Token:     token,
+			CreatedAt: time.Now(),
+			ExpiresAt: ExpiresAt,
+		}
+
+		_, err := collection.InsertOne(context.Background(), session)
+		if err != nil {
+			return nil, fmt.Errorf("error inserting session: %w", err)
+		}
+
+		return session, nil
+
+	} else {
+		return nil, fmt.Errorf("error fetching session: %w", findSessionErr)
+	}
 }
 
 func InvalidateSession(token string) error {
