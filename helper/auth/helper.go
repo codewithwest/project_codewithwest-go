@@ -51,7 +51,7 @@ func IsQueryOrMutation(r *http.Request) bool {
 	return false
 }
 
-func ValidateSession(next http.HandlerFunc) http.HandlerFunc {
+func ValidateSession(next http.HandlerFunc, key string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !IsQueryOrMutation(r) {
 			next.ServeHTTP(w, r)
@@ -59,7 +59,7 @@ func ValidateSession(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// if token is valid the check with mongo sessions if it is still valid
-		_, err := mongoDB.GetSessionFromRequest(r)
+		_, err := mongoDB.GetSessionFromRequest(r, key)
 		if err != nil {
 			LOGGER.Error().Msg(err.Error())
 			http.Error(w, "Sorry! you do not have a valid session", http.StatusUnauthorized)
@@ -76,6 +76,6 @@ func EnableCors(w *http.ResponseWriter) {
 
 	header.Add("Access-Control-Allow-Origin", allowedOrigins)
 	header.Add("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
-	header.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, signature, user_id") // Add "signature"
+	header.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Signature, user_id") // Add "signature"
 	header.Add("Access-Control-Allow-Credentials", "true")
 }

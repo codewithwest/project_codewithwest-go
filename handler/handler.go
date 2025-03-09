@@ -42,8 +42,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 				return
 			}
+			ctx := context.WithValue(r.Context(), "http.Request", r)
+			r = r.WithContext(ctx)
+
 			mainController.GetData().ServeHTTP(w, r)
-		})).Methods("GET", "POST", "OPTIONS")
+		}, "Authorization")).Methods("GET", "POST", "OPTIONS")
 
 	router.ServeHTTP(w, r)
 }

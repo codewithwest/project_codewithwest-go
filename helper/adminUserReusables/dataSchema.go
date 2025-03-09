@@ -37,3 +37,8 @@ type AdminUserInputMongo struct {
 	UpdatedAt string  `json:"updated_at" bson:"updated_at"`
 	LastLogin *string `json:"last_login" bson:"last_login"`
 }
+
+type AdminUserIsAdministrator struct {
+	ID   int    `json:"id" bson:"id"`
+	Role string `json:"role" bson:"role"`
+}

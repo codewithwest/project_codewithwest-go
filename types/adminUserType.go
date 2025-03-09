@@ -37,6 +37,19 @@ var AdminUserType = graphql.NewObject(
 	},
 )
 
+var LoginAdminUserType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "LoginAdminUser",
+		Fields: graphql.Fields{
+			"id": &graphql.Field{
+				Type: graphql.String,
+			},
+			"token": &graphql.Field{
+				Type: graphql.String,
+			},
+		},
+	})
+
 var AdminUserRequestType = graphql.NewObject(
 	graphql.ObjectConfig{
 		Name: "AdminUserRequest",

@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/graphql-go/graphql"
 	"go_server/helper"
+	"log"
 	"net/http"
 	"time"
 
@@ -21,15 +23,22 @@ type Session struct {
 	ExpiresAt time.Time `json:"expires_at" bson:"expires_at"`
 }
 
-func GetSessionFromRequest(r *http.Request) (*Session, error) {
-	token := r.Header.Get("Authorization")
+func ResolveToken(r *http.Request, key string) (string, error) {
+	token := r.Header.Get(key)
 	if token == "" {
-		return nil, fmt.Errorf("no authorization token provided")
+		return "", fmt.Errorf("no authorization token provided")
 	}
 
-	// Remove "Bearer " prefix if present
 	if len(token) > 7 && token[:7] == "Bearer " {
 		token = token[7:]
+	}
+	return token, nil
+}
+
+func GetSessionFromRequest(r *http.Request, key string) (*Session, error) {
+	token, tokenError := ResolveToken(r, key)
+	if tokenError != nil {
+		return nil, tokenError
 	}
 
 	collection, err := ConnectMongoDB("sessions")
@@ -44,7 +53,7 @@ func GetSessionFromRequest(r *http.Request) (*Session, error) {
 	}).Decode(&session)
 
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, fmt.Errorf("invalid or expired session")
 		}
 		return nil, fmt.Errorf("error fetching session: %w", err)
@@ -140,4 +149,28 @@ func InvalidateSession(token string) error {
 	}
 
 	return nil
+}
+
+func UserDataAccessIsAuthorized(params graphql.ResolveParams) (string, error) {
+	requestContext := params.Context
+
+	request, ok := requestContext.Value("http.Request").(*http.Request)
+
+	if !ok {
+		return "", fmt.Errorf("http.Request not found in context")
+	}
+
+	validSignature, isValidSignatureErr := GetSessionFromRequest(request, "Signature")
+	if isValidSignatureErr != nil || validSignature == nil {
+		return "", isValidSignatureErr
+	}
+	userId := request.Header.Get("user_id")
+
+	if userId == "" {
+		return "", fmt.Errorf("userId header missing")
+	} else {
+		log.Printf("userId header: %s", userId)
+	}
+
+	return userId, nil
 }

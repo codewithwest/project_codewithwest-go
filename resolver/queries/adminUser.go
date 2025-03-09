@@ -19,6 +19,7 @@ import (
 )
 
 func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
+
 	inputArg, isInput := params.Args["input"].(map[string]interface{})
 	if !isInput {
 		return nil, fmt.Errorf("invalid Input arguments")
@@ -71,10 +72,22 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	return map[string]interface{}{
 		"token": session.Token,
 	}, nil
-
 }
 
 func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
+	isAuthorized, err := mongoDB.UserDataAccessIsAuthorized(params)
+	if err != nil {
+		return nil, fmt.Errorf("not authorized")
+	}
+
+	adminUserId, strToIntErr := strconv.Atoi(isAuthorized)
+	if strToIntErr != nil {
+		return nil, strToIntErr
+	}
+
+	filter := bson.M{
+		"id": adminUserId,
+	}
 	limit, ok := params.Args["limit"].(int)
 	if !ok {
 		return nil, fmt.Errorf("missing limit Argument")
@@ -88,6 +101,20 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
+
+	var administrator adminUserReusables.AdminUserIsAdministrator
+	isAdministratorError := collection.FindOne(context.Background(), filter).Decode(&administrator)
+	if isAdministratorError != nil {
+		if errors.Is(isAdministratorError, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf(isAdministratorError.Error())
+		}
+
+		return nil, fmt.Errorf("oops looks like an error occurred on our side, if the error continues contact support or create new account if you don't already have one please reset your password")
+	}
+
+	if administrator.Role != "administrator" {
+		return nil, fmt.Errorf("oops! you do not have access to this resource")
+	}
 
 	findOptions := options.Find().SetLimit(int64(limit))
 	cursor, err := collection.Find(ctx, bson.D{}, findOptions)

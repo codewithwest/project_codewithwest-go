@@ -68,7 +68,6 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID")
 	}
 
-	// Adjust type assertion if needed
 	var createdUser adminUserReusables.AdminUserInputMongo
 	err = collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&createdUser)
 	if err != nil {
