@@ -3,14 +3,15 @@ package mutations
 import (
 	"context"
 	"fmt"
-	"github.com/graphql-go/graphql"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go_server/helper"
 	"go_server/helper/adminUserReusables"
 	"go_server/helper/mongoDB"
 	"log"
 	"time"
+
+	"github.com/graphql-go/graphql"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
@@ -24,10 +25,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	password := userValues[1]
 	username := userValues[2]
 
-	collection, err := mongoDB.ConnectMongoDB(
-		helper.GetEnvVariable("MONGO_DB_URL"),
-		"codewithwest",
-		"admin_users")
+	collection, err := mongoDB.ConnectMongoDB("admin_users")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,7 +68,6 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID")
 	}
 
-	// Adjust type assertion if needed
 	var createdUser adminUserReusables.AdminUserInputMongo
 	err = collection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&createdUser)
 	if err != nil {
@@ -82,6 +79,14 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 }
 
 func CreateAdminUserRequest(params graphql.ResolveParams) (interface{}, error) {
+	session := params.Context.Value("session").(*mongoDB.Session)
+	// log session
+	log.Println(session)
+
+	if session == nil {
+		return nil, fmt.Errorf("missing session")
+	}
+
 	email, isEmail := params.Args["email"].(string)
 
 	if !isEmail {
@@ -92,10 +97,7 @@ func CreateAdminUserRequest(params graphql.ResolveParams) (interface{}, error) {
 		return nil, err
 	}
 
-	collection, err := mongoDB.ConnectMongoDB(
-		helper.GetEnvVariable("MONGO_DB_URL"),
-		"codewithwest",
-		"admin_user_request") // Replace placeholders
+	collection, err := mongoDB.ConnectMongoDB("admin_user_request") // Replace placeholders
 	if err != nil {
 		log.Fatal(err)
 	}

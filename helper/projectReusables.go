@@ -32,12 +32,41 @@ func GetProjectInput() *graphql.InputObject {
 	})
 }
 
+func GetOptionalString(input map[string]interface{}, key string) string {
+	if val, ok := input[key].(string); ok {
+		return val
+	}
+	return ""
+}
+
 func NewProjectCategory(id int, name string) ProjectCategoryMongo {
 	return ProjectCategoryMongo{
 		ID:        id + 1,
 		Name:      name,
 		CreatedAt: GetCurrentDateTime(),
 		UpdatedAt: GetCurrentDateTime(),
+	}
+}
+
+func NewProject(
+	id int,
+	projectCategoryId int,
+	name string,
+	description string,
+	techStacks []string,
+	inputArg map[string]interface{},
+) ProjectMongo {
+	return ProjectMongo{
+		ID:                id + 1,
+		ProjectCategoryId: projectCategoryId,
+		Name:              name,
+		Description:       description,
+		TechStacks:        techStacks,
+		GithubLink:        GetOptionalString(inputArg, "github_link"),
+		LiveLink:          GetOptionalString(inputArg, "live_link"),
+		TestLink:          GetOptionalString(inputArg, "test_link"),
+		CreatedAt:         GetCurrentDateTime(),
+		UpdatedAt:         GetCurrentDateTime(),
 	}
 }
 

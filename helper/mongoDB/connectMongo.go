@@ -4,27 +4,27 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go_server/helper"
+	"go_server/helper/adminUserReusables"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go_server/helper/adminUserReusables"
 )
 
-//var RetrievedCollection *mongo.Collection
-
-func ConnectMongoDB(uri, databaseName, collectionName string) (*mongo.Collection, error) {
-	clientOptions := options.Client().ApplyURI(uri)
+func ConnectMongoDB(collectionName string) (*mongo.Collection, error) {
+	clientOptions := options.Client().ApplyURI(helper.GetEnvVariable("MONGO_DB_URL"))
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
+		return nil, fmt.Errorf("failed to connect to Database: %w", err)
 	}
 
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
+		return nil, fmt.Errorf("failed to ping Database: %w", err)
 	}
-	var collection *mongo.Collection
-	collection = client.Database(databaseName).Collection(collectionName)
+
+	collection := client.Database(helper.GetEnvVariable("MONGO_DB_NAME")).Collection(collectionName)
 
 	return collection, nil
 }
@@ -56,12 +56,12 @@ func GetHighestIdInCollection(collection *mongo.Collection) (int, error) {
 	err := collection.FindOne(context.Background(), bson.D{}, opts).Decode(&result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return 0, nil // No documents found
+			return 0, nil
 		}
-		return 0, fmt.Errorf("finding highest ID: %w", err)
+
+		return 0, fmt.Errorf("error! finding highest ID: %w", err)
 	}
 
-	fmt.Printf("Highest ID: %d\n", result.ID)
 	return result.ID, nil
 }
 
@@ -71,17 +71,12 @@ func EmailExist(collection *mongo.Collection, email string) (bool, error) {
 		return false, createEmailIndexError
 	}
 
-	filter := bson.M{"email": email} // Create a filter for the email
-
-	var result struct {
-		Email string `bson:"email"` // Only need the email field in the result
-	}
-
-	err := collection.FindOne(context.Background(), filter).Decode(&result)
+	err := collection.FindOne(context.Background(), bson.M{"email": email}).Decode(&EmailType)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return false, nil
 		}
+
 		return false, fmt.Errorf("checking email existence: %w", err) // Other error
 	}
 
@@ -94,18 +89,12 @@ func NameExists(collection *mongo.Collection, name string) (bool, error) {
 		return false, createNameIndexError
 	}
 
-	filter := bson.M{"name": name} // Create a filter for the email
-
-	var result struct {
-		Name string `bson:"name"` // Only need the email field in the result
-	}
-
-	err := collection.FindOne(context.Background(), filter).Decode(&result)
+	err := collection.FindOne(context.Background(), bson.M{"name": name}).Decode(&NameType)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return false, nil
 		}
-		return false, fmt.Errorf("checking email existence: %w", err) // Other error
+		return false, fmt.Errorf("checking name existence: %w", err) // Other error
 	}
 
 	return true, nil

@@ -3,14 +3,15 @@ package queries
 import (
 	"context"
 	"fmt"
-	"github.com/graphql-go/graphql"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go_server/helper"
 	"go_server/helper/mongoDB"
 	"log"
 	"time"
+
+	"github.com/graphql-go/graphql"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func GetProjects(params graphql.ResolveParams) (interface{}, error) {
@@ -20,10 +21,7 @@ func GetProjects(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("missing limit Argument")
 	}
 
-	collection, err := mongoDB.ConnectMongoDB(
-		helper.GetEnvVariable("MONGO_DB_URL"),
-		"codewithwest",
-		"projects")
+	collection, err := mongoDB.ConnectMongoDB("projects")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,10 +62,7 @@ func GetProjectCategories(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("missing limit Argument")
 	}
 
-	collection, err := mongoDB.ConnectMongoDB(
-		helper.GetEnvVariable("MONGO_DB_URL"),
-		"codewithwest",
-		"project_categories")
+	collection, err := mongoDB.ConnectMongoDB("project_categories")
 	if err != nil {
 		log.Fatal(err)
 	}
