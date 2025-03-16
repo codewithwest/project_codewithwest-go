@@ -42,9 +42,12 @@ var LoginAdminUserType = graphql.NewObject(
 		Name: "LoginAdminUser",
 		Fields: graphql.Fields{
 			"id": &graphql.Field{
-				Type: graphql.String,
+				Type: graphql.Int,
 			},
 			"token": &graphql.Field{
+				Type: graphql.String,
+			},
+			"email": &graphql.Field{
 				Type: graphql.String,
 			},
 		},

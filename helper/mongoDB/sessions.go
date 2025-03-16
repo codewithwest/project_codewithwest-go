@@ -153,14 +153,14 @@ func InvalidateSession(token string) error {
 
 func UserDataAccessIsAuthorized(params graphql.ResolveParams) (string, error) {
 	requestContext := params.Context
-
 	request, ok := requestContext.Value("http.Request").(*http.Request)
 
 	if !ok {
+
 		return "", fmt.Errorf("http.Request not found in context")
 	}
 
-	validSignature, isValidSignatureErr := GetSessionFromRequest(request, "Signature")
+	validSignature, isValidSignatureErr := GetSessionFromRequest(request, "Authentication")
 	if isValidSignatureErr != nil || validSignature == nil {
 		return "", isValidSignatureErr
 	}

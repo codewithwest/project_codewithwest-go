@@ -71,6 +71,8 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	return map[string]interface{}{
 		"token": session.Token,
+		"id":    strconv.Itoa(adminUser.ID),
+		"email": email,
 	}, nil
 }
 
@@ -145,6 +147,11 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 }
 
 func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
+	_, err := mongoDB.UserDataAccessIsAuthorized(params)
+	if err != nil {
+		return nil, fmt.Errorf("not authorized")
+	}
+
 	limit, ok := params.Args["limit"].(int)
 	if !ok {
 		return nil, fmt.Errorf("missing limit Argument")
