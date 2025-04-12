@@ -17,7 +17,8 @@ func ValidateEmailAddress(email string) (bool, error) {
 }
 
 func GetEnvVariable(searchValue string) string {
-	if os.Getenv("VERCEL") == "" { // The "VERCEL" env variable is set by Vercel
+	if os.Getenv("VERCEL") == "" {
+		// The "VERCEL" env variable is set by Vercel
 		if err := godotenv.Load(); err != nil {
 			log.Println("Error loading .env file (development only):", err)
 			// You can choose to continue or exit if the .env file is missing
@@ -33,13 +34,15 @@ func GetEnvVariable(searchValue string) string {
 
 func GetCurrentDateTime() string {
 	resolvedTime := time.Now()
-	local, err := time.LoadLocation("Local") // Or specify a specific location like "Africa/Johannesburg"
+	local, err := time.LoadLocation("Local") // Or specify a specific location like "Africa/Johannesburg"\
+
 	if err != nil {
 		fmt.Println("Error loading location:", err)
-		return resolvedTime.Format("02-01-2006 15:04:05")
 
+		return resolvedTime.Format("02-01-2006 15:04:05")
 	} else {
 		currentTime := resolvedTime.In(local)
+
 		return currentTime.Format("02-01-2006 15:04:05")
 	}
 }

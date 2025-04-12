@@ -10,7 +10,6 @@ import (
 
 func TestGetCurrentDateTime(t *testing.T) {
 	resultDate := helper.GetCurrentDateTime()
-
 	// Regular expression to match the "dd-mm-yyyy hh:mm:ss" format.
 	re := regexp.MustCompile(`^\d{2}-\d{2}-\d{4} \d{2}:\d{2}:\d{2}$`)
 
@@ -23,26 +22,13 @@ func TestGetCurrentDateTime(t *testing.T) {
 	fmt.Println(resultDate)
 }
 
-func TestValidateEmailAddressTrue(t *testing.T) {
-	isEmail, err := helper.ValidateEmailAddress("test@test.com")
-	if err != nil {
-		t.Fatalf("ValidateEmailAddress returned an error: %v", err)
+func TestGetEnvVariable(t *testing.T) {
+	// tests edge cases for env variables returns a string instance or an error
+	result := helper.GetEnvVariable("TEST_ENV_VAR")
+	if result == "" {
+		t.Errorf("GetEnvVariable() = %v, want match", result)
 	}
 
-	if !isEmail {
-		t.Errorf("ValidateEmailAddress(\"test@test.com\") = %v, want true", isEmail)
-	}
-}
-
-func TestValidateEmailAddressFalse(t *testing.T) {
-	isEmail, err := helper.ValidateEmailAddress("invalid email format")
-	if err != nil {
-		t.Fatalf("ValidateEmailAddress returned an error: %v", err)
-	}
-
-	if isEmail {
-		t.Errorf("ValidateEmailAddress(\"invalid_email\") = %v, want false", isEmail)
-	}
 }
 
 func TestValidateEmailAddressEdgeCases(t *testing.T) {
@@ -58,7 +44,7 @@ func TestValidateEmailAddressEdgeCases(t *testing.T) {
 		{"test.test@test.com", true},
 		{"test+filter@test.com", true},
 		{"test.test@test.co.uk", true},
-		// Add more edge cases as needed
+		{"test.test@test.co.za", true},
 	}
 
 	for _, tc := range testCases {

@@ -99,3 +99,20 @@ func NameExists(collection *mongo.Collection, name string) (bool, error) {
 
 	return true, nil
 }
+
+func UserNameExists(collection *mongo.Collection, userName string) (bool, error) {
+	_, createUserNameIndexError := CreateIndex(collection, "username")
+	if createUserNameIndexError != nil {
+		return false, createUserNameIndexError
+	}
+
+	err := collection.FindOne(context.Background(), bson.M{"username": userName}).Decode(&UserNameType)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return false, nil
+		}
+		return false, fmt.Errorf("checking name existence: %w", err) // Other error
+	}
+
+	return true, nil
+}
