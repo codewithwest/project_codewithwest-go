@@ -93,9 +93,7 @@ func CreateClient(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("session creation failed: %w", err)
 	}
 
-	// Return formatted response
-	var response = clientReusables.ClientInputReturnData(session, clientInput)
-	// convert response to interface
+	response := clientReusables.ClientInputReturnData(session, clientInput)
 
 	return response, nil
 }
