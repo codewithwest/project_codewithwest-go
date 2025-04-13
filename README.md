@@ -1,140 +1,67 @@
-# Codewithwest-go server
+# Codewithwest Go Documentation
 
-### This is the backend application that bridges the [Admin](https://github.com/codewithwest/project_codewithwest-go) and database interaction and feeds data also the [FrontEnd](https://codewithwest.vercel.app/)
+## Table of Contents
 
-## Functionality Provided
+- [Overview](#overview)
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Project Structure](#project-structure)
+- [Configuration](#configuration)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [License](#license)
 
-### Create Admin User
-```
-    mutation createAdminUser($input: AdminUserInput!) {
-        createAdminUser(input: $input) {
-          id
-          username
-          email
-          password
-          role
-          type
-          created_at
-          updated_at
-          last_login
-      }
-    }
-```
-### Get Admin Users
-```
-    query getAdminUsers($limit: Int!) { # $filter is the parameter
-       getAdminUsers(limit: $limit) {
-          created_at
-          email
-          id
-          last_login
-          password
-          role
-          type
-          updated_at
-          username
-        }
-      }
-```
-### Request Admin User Access
-``` 
-mutation adminUserAccessRequest($email: String!){
-      adminUserAccessRequest(email: $email) {
-        created_at
-        email
-        id
-      }
-    }
-```
-### Get Admin user requests
-```
-      query getAdminUserAccessRequests($limit: Int!) {
-        getAdminUserAccessRequests(limit: $limit) {
-          created_at
-          email
-          id
-        }
-      }
-```
-### Create project Category
-```
- mutation createProjectCategory($name: String!) {
-      createProjectCategory(name: $name) {
-        id
-        name
-        created_at
-        updated_at
-      }
-    }
-```
-### Get project categories
-```
-    query getProjects($limit: Int!) {
-        getProjects(limit: $limit) {
-          created_at
-          description
-          github_link
-          id
-          live_link
-          name
-          project_category_id
-          tech_stacks
-          test_link
-          updated_at
-        }
-      }
-```
-### Create Project
-```
-    mutation createProject($input: ProjectInput!) {
-          createProject(input: $input) {
-            id
-            project_category_id
-            name
-            description
-            tech_stacks
-            github_link
-            live_link
-            test_link
-            created_at
-            updated_at
-          }
-        }
-```
-### Get Projects
-```
-    query getProjects($limit: Int!) {
-        getProjects(limit: $limit) {
-          created_at
-          description
-          github_link
-          id
-          live_link
-          name
-          project_category_id
-          tech_stacks
-          test_link
-          updated_at
-        }
-      }
-```
-### Login Admin User
-```
-    query loginAdminUser($input: AdminUserInput!) {
-        loginAdminUser(input: $input) {
-          created_at
-          email
-          id
-          last_login
-          password
-          role
-          type
-          updated_at
-          username
-      }
-    }
-```
+## Overview
 
+    This project serves and codewithwest projects powerhouse housing all
+    information created by the engineer and providing data to FE web
+    application.
 
+## Features
 
+- [Client Documentation](./docs/client.md)
+- [Admin Documentation](./docs/admin.md) To-do
+- [Project Categories Documentation](./docs/project-categories.md) To-do
+- [Projects Documentation](./docs/projects.md) To-do
 
+## Prerequisites
+
+    - Go 1.22.2
+    - github.com/graphql-go/handler v0.2.4
+    - github.com/joho/godotenv v1.5.1
+    - github.com/rs/zerolog v1.33.0
+    - go.mongodb.org/mongo-driver v1.17.2
+    - golang.org/x/crypto v0.33.0
+    - github.com/golang/snappy v0.0.4
+    - github.com/klauspost/compress v1.16.7
+    - github.com/montanaflynn/stats v0.7.1
+    - github.com/xdg-go/pbkdf2 v1.0.0
+    - github.com/xdg-go/scram v1.1.2
+    - github.com/xdg-go/stringprep v1.0.4
+    - github.com/youmark/pkcs8 v0.0.0-20240726163527-a2c0da244d78
+    - golang.org/x/sync v0.11.0
+    - golang.org/x/text v0.22.0
+    - github.com/gorilla/mux v1.8.1
+    - github.com/graphql-go/graphql v0.8.1
+    - github.com/mattn/go-colorable v0.1.13
+    - github.com/mattn/go-isatty v0.0.19
+    - golang.org/x/sys v0.30.0
+
+## Installation
+
+    `git clone https://github.com/codewithwest/project_codewithwest-go  codewithwest-go`
+
+    install docker compose if not installed
+
+    cd codewithwest-go
+
+    docker compose up -d
+
+    Access resource on https://localhost:3071/graphql
+
+## Testing
+
+    docker exec -it codewithwest-go bash
+    go test ./tests

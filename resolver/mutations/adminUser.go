@@ -39,7 +39,7 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		collection, email)
 
 	if isEmailExists != nil {
-		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID", isEmailExists)
+		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID %s", isEmailExists)
 	}
 	if emailExist {
 		return nil, fmt.Errorf("email already exists")
@@ -62,7 +62,6 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
 	insertedID := result.InsertedID // No type assertion here yet
 
-	// Convert ObjectID to string
 	objectID, ok := insertedID.(primitive.ObjectID) // Type assertion to primitive.ObjectID
 	if !ok {
 		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID")
@@ -75,7 +74,6 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	}
 
 	return createdUser, nil
-
 }
 
 func CreateAdminUserRequest(params graphql.ResolveParams) (interface{}, error) {

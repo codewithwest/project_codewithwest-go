@@ -15,10 +15,22 @@ var ClientType = graphql.NewObject(
 			"email": &graphql.Field{
 				Type: graphql.String,
 			},
+			"company_name": &graphql.Field{
+				Type: graphql.String,
+			},
+			"type": &graphql.Field{
+				Type: graphql.String,
+			},
+			"status": &graphql.Field{
+				Type: graphql.String,
+			},
 			"token": &graphql.Field{
 				Type: graphql.String,
 			},
-			"company_name": &graphql.Field{
+			"created_at": &graphql.Field{
+				Type: graphql.String,
+			},
+			"updated_at": &graphql.Field{
 				Type: graphql.String,
 			},
 			"last_login": &graphql.Field{
