@@ -4,10 +4,12 @@
 
 - [Overview](#overview)
 - [Mutations](#mutations)
-  - [createAdminUser](#createadminuser) 
+  - [createAdminUser](#createadminuser)
+  - [createAdminUSerRequest](#createadminuserrequest)
 - [Queries](#queries)
   - [loginAdminUser](#loginadminuser) 
   - [getAdminUsers](#getadminusers)
+  - [getAdminUserRequests](#getadminuserrequests)
 
 ## Overview
 
@@ -112,6 +114,100 @@ mutation {
 - Efficient error handling flow
 - Minimal memory usage
 - Atomic ID generation process
+
+### createAdminUserRequests
+#### Description:
+
+Creates a new administrative user request in the system. This function validates 
+the requester's authorization, checks email uniqueness, and stores the request 
+with appropriate timestamps.
+
+#### Input Parameters:
+
+```
+  email: String (required) - Requested email address for admin account
+```
+
+#### Process:
+
+1. Validates user authorization and permissions
+2. Validates email format and uniqueness
+3. Establishes connection to MongoDB with timeout settings
+4. Generates new unique ID for the request
+5. Creates request record with timestamp
+6. Returns created request data
+
+#### Sample:
+``` 
+mutation {
+  createAdminUserRequest(
+    email: "mailto:newadmin@example.com"
+  ) {
+  id
+  email
+  created_at
+  status
+  updated_at
+  }
+}
+```
+
+#### Possible Errors:
+
+- "not authorized" - User authentication failed
+- "invalid user id" - Error parsing authorized user's ID
+- "missing required argument(s)" - Email parameter not provided
+- "invalid email format" - Email format validation failed
+- "database connection error" - MongoDB connection issues
+- "email already exists" - Duplicate email address
+- "error generating user ID" - ID generation failed
+- "failed to create user" - Request creation failed
+- "internal server error" - Unexpected server-side issues
+
+#### Returns:
+``` 
+{
+  "data": {
+    "createAdminUserRequest": {
+      "id": "8",
+      "email": "mailto:newadmin@example.com",
+      "created_at": "2024-01-20T15:30:00Z",
+    }
+  }
+}
+```
+
+#### Security Considerations:
+
+- Implements user authorization validation
+- Uses context timeout to prevent hanging operations
+- Returns generic error messages to prevent information leakage
+- Validates input data before processing
+- Uses secure database connections
+- Implements proper error wrapping
+- Validates email format
+- Checks for duplicate emails
+- Uses atomic operations for ID generation
+
+#### Technical Details:
+
+- Context Timeout: 30 seconds
+- Database Collection: "admin_user_request"
+- Email Validation: RFC 5322 standards
+- ID Generation: Auto-incrementing based on collection maximum
+- Status Field: Default "pending"
+- Timestamp Format: UTC RFC3339
+
+#### Performance Notes:
+- Optimized database queries
+- Single database connection per request
+- Efficient error handling flow
+- Minimal memory usage
+- Atomic ID generation
+- Proper resource cleanup
+- Index-based email uniqueness check
+- Streamlined request creation process
+- Efficient timestamp handling
 
 ### Queries:
 
@@ -304,6 +400,108 @@ query {
 - Sorting: By ID ascending
 - Pagination: Skip-based implementation
 - Response Type: AdminUsersPaginatedResponse
+
+#### Performance Notes:
+
+- Uses efficient cursor-based pagination
+- Implements proper cursor cleanup
+- Uses index-based sorting
+- Optimized document counting
+- Efficient batch document retrieval
+- Proper connection handling
+- Memory-efficient result processing
+
+### getAdminUserRequests
+
+#### Description: 
+    Retrieves a paginated list of administrative user requests from the system. 
+    This endpoint requires administrator privileges and implements pagination 
+    for efficient data retrieval and display. Requests are sorted by creation 
+    date with newest first.
+
+#### Input Parameters:
+
+```
+  limit: Int (optional) - Number of items per page (default: 10)
+  page: Int (optional) - Page number to retrieve (default: 1)
+```
+
+#### Process:
+- Validates user authorization and administrator privileges
+- Implements pagination with configurable page size
+- Retrieves total count of requests for pagination metadata
+- Sorts requests by creation date in descending order
+- Returns paginated list with metadata
+- Performs proper resource cleanup
+
+#### Sample:
+
+```
+query {
+  getAdminUserRequests(limit: 10, page: 1) {
+    data {
+      id
+      email
+      created_at
+    }
+    page
+    totalPages
+    totalItems
+  }
+}
+```
+
+#### Possible Errors:
+
+- "not authorized" - User authentication failed
+- "invalid user id" - Error parsing user identifier
+- "database connection error" - MongoDB connection issues
+- "user not found" - Requesting user not found in system
+- "access denied: administrator privileges required" - User lacks admin role
+- "error counting documents" - Pagination counting failed
+- "error fetching requests" - Database query failed
+- "no requests found" - Empty result set
+- "error decoding requests" - Data parsing error
+- "internal server error" - Unexpected server-side issues
+
+#### Returns:
+
+```
+{
+"data": {
+  "getAdminUserRequests": {
+    "data":
+    {
+      "id": "1",
+      "email": "mailto:requestor@example.com",
+      "created_at": "2024-01-20T10:00:00Z",
+    }
+    "page": 1,
+    "totalPages": 5,
+    "totalItems": 48
+    }
+  }
+}
+```
+
+#### Security Considerations:
+
+- Implements user authorization checks
+- Validates administrator privileges
+- Uses context timeout for security
+- Returns generic error messages
+- Implements proper resource cleanup
+- Uses secure database connections
+- Validates input parameters
+
+#### Technical Details:
+
+- Context Timeout: 10 seconds
+- Database Collection: "admin_user_request"
+- Default Page Size: 10 items
+- Sorting: By created_at descending
+- Pagination: Skip-based implementation
+- Response Type: AdminUserRequestsPaginatedResponse
 
 #### Performance Notes:
 

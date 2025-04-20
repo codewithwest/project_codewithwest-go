@@ -24,40 +24,11 @@ var AdminUserInputDef = graphql.NewInputObject(graphql.InputObjectConfig{ // Cre
 	},
 })
 
-var AdminUserRequestInputDef = graphql.NewInputObject(graphql.InputObjectConfig{
-	Name:        "AdminUserRequestInput",
-	Description: "Input for creating a new admin user request",
-	Fields: graphql.InputObjectConfigFieldMap{
-		"email": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewNonNull(graphql.String),
-		},
-	},
-})
-
-type AdminUser struct {
-	ID        string  `json:"id"`
-	Username  string  `json:"username"`
-	Email     string  `json:"email"`
-	Password  *string `json:"password"`
-	Role      string  `json:"role"`
-	Type      string  `json:"type"`
-	Status    string  `json:"status"`
-	CreatedAt string  `json:"created_at"`
-	UpdatedAt string  `json:"updated_at"`
-	LastLogin string  `json:"last_login"`
-}
-
 type AdminUserInput struct {
 	ID       int     `json:"id"`
 	UserName string  `json:"name"`
 	Email    string  `json:"email"`
 	Password *string `json:"password"`
-}
-
-type AdminUserRequest struct {
-	ID        int    `json:"id" bson:"id"`
-	Email     string `json:"email" bson:"email"`
-	CreatedAt string `json:"created_at" bson:"created_at"`
 }
 
 type AdminUserInputMongo struct {

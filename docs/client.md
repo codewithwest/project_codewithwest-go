@@ -181,7 +181,7 @@ mutation {
 
 #### Technical Details:
 
-- Context Timeout: 10 seconds
+- Context Timeout: 30 seconds
 - Database Collection: "clients"
 
 #### required Dependencies:
@@ -198,8 +198,5 @@ mutation {
 - Minimal memory usage
 - Streamlined authentication process
 - Single database query implementation
-
-
-
 
 [Back to main](../README.md#features)

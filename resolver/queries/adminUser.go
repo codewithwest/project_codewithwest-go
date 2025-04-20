@@ -146,7 +146,7 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 
 	totalPages := int32(math.Ceil(float64(totalItems) / float64(limit)))
 
-	return &adminUserReusables.AdminUsersPaginatedResponse{
+	return &adminUserReusables.AdminUsersResponse{
 		Data:       adminUsers,
 		Page:       page,
 		TotalPages: totalPages,
@@ -155,47 +155,100 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 }
 
 func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
-	_, err := mongoDB.UserDataAccessIsAuthorized(params)
+	// Authorization check
+	isAuthorized, err := mongoDB.UserDataAccessIsAuthorized(params)
 	if err != nil {
-		return nil, fmt.Errorf("not authorized")
+		return nil, fmt.Errorf("not authorized: %w", err)
 	}
 
-	limit, ok := params.Args["limit"].(int)
-	if !ok {
-		return nil, fmt.Errorf("missing limit Argument")
-	}
-
-	collection, err := mongoDB.ConnectMongoDB(
-		"admin_user_request")
-
+	adminUserId, err := strconv.Atoi(isAuthorized)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("invalid user id: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	// Get pagination parameters
+	limit := int32(10) // Default limit
+	if limitArg, ok := params.Args["limit"].(int); ok && limitArg > 0 {
+		limit = int32(limitArg)
+	}
+
+	page := int32(1) // Default page
+	if pageArg, ok := params.Args["page"].(int); ok && pageArg > 0 {
+		page = int32(pageArg)
+	}
+
+	skip := (page - 1) * limit
+
+	// Connect to database
+	collection, err := mongoDB.ConnectMongoDB("admin_user_request")
+	if err != nil {
+		return nil, fmt.Errorf("database connection error: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	findOptions := options.Find().SetLimit(int64(limit))
+	// Check administrator privileges
+	adminCollection, err := mongoDB.ConnectMongoDB("admin_users")
+	if err != nil {
+		return nil, fmt.Errorf("database connection error: %w", err)
+	}
+
+	var administrator adminUserReusables.AdminUserIsAdministrator
+	if err := adminCollection.FindOne(ctx, bson.M{"id": adminUserId}).Decode(&administrator); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("internal server error: %w", err)
+	}
+
+	if administrator.Role != "administrator" {
+		return nil, fmt.Errorf("access denied: administrator privileges required")
+	}
+
+	// Get total count for pagination
+	totalItems, err := collection.CountDocuments(ctx, bson.D{})
+	if err != nil {
+		return nil, fmt.Errorf("error counting documents: %w", err)
+	}
+
+	// Configure find options with pagination
+	findOptions := options.Find().
+		SetLimit(int64(limit)).
+		SetSkip(int64(skip)).
+		SetSort(bson.D{{Key: "created_at", Value: -1}}) // Sort by creation date, newest first
+
+	fmt.Errorf("total pages: %v", "dwdes")
+
+	// Execute query
 	cursor, err := collection.Find(ctx, bson.D{}, findOptions)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("error fetching requests: %w", err)
 	}
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
-		_ = cursor.Close(ctx)
-	}(cursor, context.Background())
-
-	var adminUserRequests []adminUserReusables.AdminUserRequest
-	for cursor.Next(context.Background()) {
-		var doc adminUserReusables.AdminUserRequest
-		if err := cursor.Decode(&doc); err != nil {
-			return nil, err
+		err := cursor.Close(ctx)
+		if err != nil {
+			log.Printf("Error closing cursor: %v", err)
 		}
-		adminUserRequests = append(adminUserRequests, doc)
+	}(cursor, ctx)
+
+	// Check if there are no documents
+	if !cursor.Next(ctx) {
+		return nil, fmt.Errorf("no requests found")
 	}
 
-	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
+	// Decode results
+	var adminUserRequests []adminUserReusables.AdminUserRequestMongo
+	if err := cursor.All(ctx, &adminUserRequests); err != nil {
+		return nil, fmt.Errorf("error decoding requests: %w", err)
 	}
 
-	return adminUserRequests, nil
+	totalPages := int32(math.Ceil(float64(totalItems) / float64(limit)))
+
+	return &adminUserReusables.AdminUsersRequestResponse{
+		Data:       adminUserRequests,
+		Page:       page,
+		TotalPages: totalPages,
+		TotalItems: int32(totalItems),
+	}, nil
 }

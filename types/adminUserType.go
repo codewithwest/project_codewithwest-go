@@ -68,26 +68,31 @@ var AdminUserRequestType = graphql.NewObject(
 	},
 )
 
-var AdminUserPaginatedType = graphql.NewObject(
-	graphql.ObjectConfig{
-		Name: "AdminUsers",
-		Fields: graphql.Fields{
-			"data": &graphql.Field{
-				Type:        graphql.NewList(AdminUserType),
-				Description: "List of admin users for the current page",
-			},
-			"page": &graphql.Field{
-				Type:        graphql.Int,
-				Description: "Current page number",
-			},
-			"totalPages": &graphql.Field{
-				Type:        graphql.Int,
-				Description: "Total number of pages available",
-			},
-			"totalItems": &graphql.Field{
-				Type:        graphql.Int,
-				Description: "Total number of items across all pages",
+func adminQueryResolverType(dataType graphql.Type, name string) *graphql.Object {
+	return graphql.NewObject(
+		graphql.ObjectConfig{
+			Name: name,
+			Fields: graphql.Fields{
+				"data": &graphql.Field{
+					Type:        graphql.NewList(dataType),
+					Description: "List of data for the current page",
+				},
+				"page": &graphql.Field{
+					Type:        graphql.Int,
+					Description: "Current page number",
+				},
+				"totalPages": &graphql.Field{
+					Type:        graphql.Int,
+					Description: "Total number of pages available",
+				},
+				"totalItems": &graphql.Field{
+					Type:        graphql.Int,
+					Description: "Total number of items across all pages",
+				},
 			},
 		},
-	},
-)
+	)
+}
+
+var AdminUsersQueryType = adminQueryResolverType(AdminUserType, "AdminUsersType")
+var AdminUserRequestQueryType = adminQueryResolverType(AdminUserRequestType, "AdminUserRequestType")

@@ -24,31 +24,16 @@ func GetAdminUsersSchema(adminUserType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
 		Type:        adminUserType,
 		Description: "Get all admin users",
-		Args: graphql.FieldConfigArgument{
-			"limit": &graphql.ArgumentConfig{
-				Type:         graphql.Int,
-				DefaultValue: 10,
-				Description:  "Number of items per page",
-			},
-			"page": &graphql.ArgumentConfig{
-				Type:         graphql.Int,
-				DefaultValue: 1,
-				Description:  "Page number",
-			},
-		},
-		Resolve: queries.GetAdminUsers,
+		Args:        adminUserReusables.AdminUserQueriesInput,
+		Resolve:     queries.GetAdminUsers,
 	}
 }
 
 func GetAdminUserRequests(adminUserType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
-		Name: "AdminUserRequest",
-		Type: graphql.NewList(adminUserType),
-		Args: graphql.FieldConfigArgument{
-			"limit": &graphql.ArgumentConfig{
-				Type: graphql.Int,
-			},
-		},
+		Name:        "AdminUserRequest",
+		Type:        adminUserType,
+		Args:        adminUserReusables.AdminUserQueriesInput,
 		Resolve:     queries.GetAdminUserRequests,
 		Description: "Get all admin user requests",
 	}
