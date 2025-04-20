@@ -16,7 +16,7 @@ func GetSchema() (graphql.Schema, error) {
 				"getUser":                    user.GetUserSchema(UserType),
 				"getUsers":                   user.GetUsersSchema(UserType),
 				"loginAdminUser":             admin.GetLoginAdminUserSchema(AdminUserType),
-				"getAdminUsers":              admin.GetAdminUsersSchema(AdminUserType),
+				"getAdminUsers":              admin.GetAdminUsersSchema(AdminUserPaginatedType),
 				"getAdminUserAccessRequests": admin.GetAdminUserRequests(AdminUserRequestType),
 				"getProjects":                projects.GetProjects(ProjectType),
 				"getProjectCategories":       projects.GetProjectCategories(ProjectCategoryType),

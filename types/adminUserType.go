@@ -48,7 +48,8 @@ var LoginAdminUserType = graphql.NewObject(
 				Type: graphql.String,
 			},
 		},
-	})
+	},
+)
 
 var AdminUserRequestType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -64,4 +65,29 @@ var AdminUserRequestType = graphql.NewObject(
 				Type: graphql.String,
 			},
 		},
-	})
+	},
+)
+
+var AdminUserPaginatedType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name: "AdminUsers",
+		Fields: graphql.Fields{
+			"data": &graphql.Field{
+				Type:        graphql.NewList(AdminUserType),
+				Description: "List of admin users for the current page",
+			},
+			"page": &graphql.Field{
+				Type:        graphql.Int,
+				Description: "Current page number",
+			},
+			"totalPages": &graphql.Field{
+				Type:        graphql.Int,
+				Description: "Total number of pages available",
+			},
+			"totalItems": &graphql.Field{
+				Type:        graphql.Int,
+				Description: "Total number of items across all pages",
+			},
+		},
+	},
+)

@@ -214,3 +214,122 @@ mutation {
 
 [Back to main](../README.md#features)
 
+
+
+## Overview
+
+This documentation covers the GetAdminUsers query implementation in the project.
+
+## Usages
+
+### Queries:
+
+### getAdminUsers
+
+#### Description: 
+    Retrieves a paginated list of administrative users from the system. 
+    Requires administrator privileges and implements pagination for 
+    efficient data retrieval and display.
+
+#### Input Parameters:
+
+``` 
+  limit: Int (optional) - Number of items per page (default: 10)
+  page: Int (optional) - Page number to retrieve (default: 1)
+
+```
+
+#### Process:
+- Validates user authorization and administrator privileges
+- Implements pagination with configurable page size
+- Retrieves total count of users for pagination metadata
+- Sorts users by ID in ascending order
+- Returns paginated list with metadata
+- Performs proper resource cleanup
+
+#### Sample:
+
+```
+query {
+  getAdminUsers(limit: 10, page: 1) {
+    data {
+      id
+      email
+      username
+      role
+      created_at
+      updated_at
+      last_login
+    }
+    page
+    totalPages
+    totalItems
+  }
+}
+```
+
+#### Possible Errors:
+
+- "not authorized" - User authentication failed
+- "invalid user id" - Error parsing user identifier
+- "database connection error" - MongoDB connection issues
+- "user not found" - Requesting user not found in system
+- "access denied: administrator privileges required" - User lacks admin role
+- "error counting documents" - Pagination counting failed
+- "error fetching users" - Database query failed
+- "no users found" - Empty result set
+- "error decoding users" - Data parsing error
+- "internal server error" - Unexpected server-side issues
+
+#### Returns:
+
+```
+{
+  "data": {
+  "getAdminUsers": {
+    "data":
+    {
+      "id": "1",
+      "email": "mailto:admin@example.com",
+      "username": "admin",
+      "role": "administrator",
+      "created_at": "2024-01-20T10:00:00Z",
+      "updated_at": "2024-01-20T10:00:00Z",
+      "last_login": "2024-01-20T15:30:00Z"
+    }
+    "page": 1,
+    "totalPages": 5,
+    "totalItems": 48
+    }
+  }
+}
+```
+
+#### Security Considerations:
+
+- Implements user authorization checks
+- Validates administrator privileges
+- Uses context timeout for security
+- Returns generic error messages
+- Implements proper resource cleanup
+- Uses secure database connections
+- Validates input parameters
+
+#### Technical Details:
+
+- Context Timeout: 10 seconds
+- Database Collection: "admin_users"
+- Default Page Size: 10 items
+- Sorting: By ID ascending
+- Pagination: Skip-based implementation
+- Response Type: AdminUsersPaginatedResponse
+
+#### Performance Notes:
+
+- Uses efficient cursor-based pagination
+- Implements proper cursor cleanup
+- Uses index-based sorting
+- Optimized document counting
+- Efficient batch document retrieval
+- Proper connection handling
+- Memory-efficient result processing

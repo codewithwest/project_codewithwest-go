@@ -22,11 +22,18 @@ func GetLoginAdminUserSchema(adminUserType *graphql.Object) *graphql.Field {
 
 func GetAdminUsersSchema(adminUserType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
-		Type:        graphql.NewList(adminUserType),
+		Type:        adminUserType,
 		Description: "Get all admin users",
 		Args: graphql.FieldConfigArgument{
 			"limit": &graphql.ArgumentConfig{
-				Type: graphql.Int,
+				Type:         graphql.Int,
+				DefaultValue: 10,
+				Description:  "Number of items per page",
+			},
+			"page": &graphql.ArgumentConfig{
+				Type:         graphql.Int,
+				DefaultValue: 1,
+				Description:  "Page number",
 			},
 		},
 		Resolve: queries.GetAdminUsers,

@@ -8,6 +8,7 @@ import (
 	"go_server/helper/adminUserReusables"
 	"go_server/helper/mongoDB"
 	"log"
+	"math"
 	"strconv"
 	"time"
 
@@ -62,73 +63,95 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 }
 
 func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
+	// Authorization check
 	isAuthorized, err := mongoDB.UserDataAccessIsAuthorized(params)
 	if err != nil {
-		return nil, fmt.Errorf("not authorized")
+		return nil, fmt.Errorf("not authorized: %w", err)
 	}
 
-	adminUserId, strToIntErr := strconv.Atoi(isAuthorized)
-	if strToIntErr != nil {
-		return nil, strToIntErr
-	}
-
-	filter := bson.M{
-		"id": adminUserId,
-	}
-	limit, ok := params.Args["limit"].(int)
-	if !ok {
-		return nil, fmt.Errorf("missing limit Argument")
-	}
-
-	collection, err := mongoDB.ConnectMongoDB("admin_users")
-
+	adminUserId, err := strconv.Atoi(isAuthorized)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("invalid user id: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	// Get pagination parameters
+	limit := int32(10) // Default limit
+	if limitArg, ok := params.Args["limit"].(int); ok && limitArg > 0 {
+		limit = int32(limitArg)
+	}
+
+	page := int32(1) // Default page
+	if pageArg, ok := params.Args["page"].(int); ok && pageArg > 0 {
+		page = int32(pageArg)
+	}
+
+	skip := (page - 1) * limit
+
+	// Connect to database
+	collection, err := mongoDB.ConnectMongoDB("admin_users")
+	if err != nil {
+		return nil, fmt.Errorf("database connection error: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// Check administrator privileges
 	var administrator adminUserReusables.AdminUserIsAdministrator
-	isAdministratorError := collection.FindOne(context.Background(), filter).Decode(&administrator)
-	if isAdministratorError != nil {
-		if errors.Is(isAdministratorError, mongo.ErrNoDocuments) {
-			return nil, fmt.Errorf(isAdministratorError.Error())
+	if err := collection.FindOne(ctx, bson.M{"id": adminUserId}).Decode(&administrator); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("user not found")
 		}
-
-		return nil, fmt.Errorf("oops looks like an error occurred on our side, if the error continues contact support or create new account if you don't already have one please reset your password")
+		return nil, fmt.Errorf("internal server error: %w", err)
 	}
 
 	if administrator.Role != "administrator" {
-		return nil, fmt.Errorf("oops! you do not have access to this resource")
+		return nil, fmt.Errorf("access denied: administrator privileges required")
 	}
 
-	findOptions := options.Find().SetLimit(int64(limit))
+	// Get total count for pagination
+	totalItems, err := collection.CountDocuments(ctx, bson.D{})
+	if err != nil {
+		return nil, fmt.Errorf("error counting documents: %w", err)
+	}
+
+	// Configure find options with pagination
+	findOptions := options.Find().
+		SetLimit(int64(limit)).
+		SetSkip(int64(skip)).
+		SetSort(bson.D{{Key: "id", Value: 1}})
+
+	// Execute query
 	cursor, err := collection.Find(ctx, bson.D{}, findOptions)
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("error fetching users: %w", err)
 	}
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		err := cursor.Close(ctx)
 		if err != nil {
-
+			log.Printf("Error closing cursor: %v", err)
 		}
-	}(cursor, context.Background())
+	}(cursor, ctx)
 
+	// Check if there are no documents
+	if !cursor.Next(ctx) {
+		return nil, fmt.Errorf("no users found")
+	}
+
+	// Decode results
 	var adminUsers []adminUserReusables.AdminUserInputMongo
-
-	for cursor.Next(context.Background()) {
-		var doc adminUserReusables.AdminUserInputMongo
-		if err := cursor.Decode(&doc); err != nil {
-			return nil, err
-		}
-		adminUsers = append(adminUsers, doc)
-	}
-	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
+	if err := cursor.All(ctx, &adminUsers); err != nil {
+		return nil, fmt.Errorf("error decoding users: %w", err)
 	}
 
-	return adminUsers, nil
+	totalPages := int32(math.Ceil(float64(totalItems) / float64(limit)))
+
+	return &adminUserReusables.AdminUsersPaginatedResponse{
+		Data:       adminUsers,
+		Page:       page,
+		TotalPages: totalPages,
+		TotalItems: int32(totalItems),
+	}, nil
 }
 
 func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
@@ -158,10 +181,7 @@ func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
 		log.Fatal(err)
 	}
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
-		err := cursor.Close(ctx)
-		if err != nil {
-
-		}
+		_ = cursor.Close(ctx)
 	}(cursor, context.Background())
 
 	var adminUserRequests []adminUserReusables.AdminUserRequest
