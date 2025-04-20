@@ -3,15 +3,15 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Usages](#usages)
-    - [Mutations](#mutations)
-    - [Queries](#queries)
+- [Mutations](#mutations)
+  - [createAdminUser](#createadminuser) 
+- [Queries](#queries)
+  - [loginAdminUser](#loginadminuser) 
+  - [getAdminUsers](#getadminusers)
 
 ## Overview
 
 This documentation cover all adminUser specific implementation done in the project.
-
-## Usages
 
 ### Mutations:
 
@@ -115,15 +115,8 @@ mutation {
 
 ### Queries:
 
-## Overview
-
-This documentation covers the admin user login implementation in the project.
-
-## Usages
-
-### Queries:
-
 ### loginAdminUser
+
 #### Description: 
     Authenticates an administrative user in the system using their email 
     and password credentials. Performs validation, password verification, 
@@ -211,18 +204,6 @@ mutation {
 - Minimal memory footprint
 - Connection pooling for database operations
 - Cached session management
-
-[Back to main](../README.md#features)
-
-
-
-## Overview
-
-This documentation covers the GetAdminUsers query implementation in the project.
-
-## Usages
-
-### Queries:
 
 ### getAdminUsers
 
@@ -333,3 +314,5 @@ query {
 - Efficient batch document retrieval
 - Proper connection handling
 - Memory-efficient result processing
+
+[Back to main](../README.md#features)

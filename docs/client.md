@@ -3,19 +3,18 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Usages](#usages)
-  - [Mutations](#mutations)
-  - [Queries](#queries)
+- [Mutations](#mutations)
+  - [CreateAdminUser](#createadminuser) 
+- [Queries](#queries)
+  - [AuthenticateClient](#authenticateclient) 
 
 ## Overview
 
 This documentation cover all client specific implementation done in the project.
 
-## Usages
+### CreateAdminUser
 
 ### Mutations:
-
-#### **_CreateClient_**
 
 #### Description:
 
@@ -98,7 +97,7 @@ mutation {
 
 ### Queries
 
-***AuthenticateClient***
+### AuthenticateClient
 
 #### Description:
 
