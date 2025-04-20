@@ -19,60 +19,45 @@ import (
 )
 
 func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
-
-	inputArg, isInput := params.Args["input"].(map[string]interface{})
-	if !isInput {
-		return nil, fmt.Errorf("invalid Input arguments")
+	adminUserLoginData, validationError := adminUserReusables.ValidateAdminUserInput(params)
+	if validationError != nil {
+		return nil, validationError
 	}
 
-	email, isEmail := inputArg["email"].(string)
-	username, isUsername := inputArg["username"].(string)
-	password, isPassword := inputArg["password"].(string)
-
-	if !isEmail || !isUsername || !isPassword {
-		return nil, fmt.Errorf("invalid email or password" + username + password)
+	collection, dbConnError := mongoDB.ConnectMongoDB("admin_users")
+	if dbConnError != nil {
+		return nil, fmt.Errorf("database connection error: %w", dbConnError)
 	}
 
-	collection, err := mongoDB.ConnectMongoDB("admin_users")
-
-	if err != nil {
-		return nil, fmt.Errorf(" ", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	var adminUser adminUserReusables.AdminUserInputMongo
-
-	findOneError := collection.FindOne(
-		ctx, bson.M{"email": email}).Decode(&adminUser)
+	findUserError := collection.FindOne(ctx, bson.M{"email": adminUserLoginData.Email}).Decode(&adminUser)
+	if findUserError != nil {
+		if errors.Is(findUserError, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("invalid email or password combination")
+		}
+		return nil, fmt.Errorf("internal server error: %w", findUserError)
+	}
 
 	if adminUser.Password == nil {
 		return nil, fmt.Errorf("invalid email or password combination")
 	}
 
-	passwordInvalid := helper.ValidatePassword(password, *adminUser.Password)
-	if !passwordInvalid {
+	if !helper.ValidatePassword(adminUserLoginData.Password, *adminUser.Password) {
 		return nil, fmt.Errorf("invalid email or password combination")
 	}
 
-	if findOneError != nil {
-		if errors.Is(findOneError, mongo.ErrNoDocuments) {
-			return nil, fmt.Errorf("incorrect Email and Password combination")
-		}
-
-		return nil, fmt.Errorf("oops looks like an error occurred on our side, if the error continues contact support or create new account if you don't already have one please reset your password")
-	}
-
-	session, err := mongoDB.CreateSession(strconv.Itoa(adminUser.ID), email, false)
-	if err != nil {
-		return nil, err
+	session, sessionError := mongoDB.CreateSession(strconv.Itoa(adminUser.ID), adminUserLoginData.Email, false)
+	if sessionError != nil {
+		return nil, fmt.Errorf("session creation failed: %w", sessionError)
 	}
 
 	return map[string]interface{}{
 		"token": session.Token,
 		"id":    strconv.Itoa(adminUser.ID),
-		"email": email,
+		"email": adminUserLoginData.Email,
 	}, nil
 }
 

@@ -46,6 +46,7 @@ type AdminUser struct {
 	UpdatedAt string  `json:"updated_at"`
 	LastLogin string  `json:"last_login"`
 }
+
 type AdminUserInput struct {
 	ID       int     `json:"id"`
 	UserName string  `json:"name"`

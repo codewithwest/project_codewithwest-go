@@ -19,7 +19,8 @@ This documentation cover all client specific implementation done in the project.
 
 #### Description:
 
-Creates a new client in the system with the provided information and returns the created client data along with a session token.
+Creates a new client in the system with the provided information and returns the 
+created client data along with a session token.
 
 #### Input Parameters:
 
