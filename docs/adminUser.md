@@ -1,15 +1,15 @@
-# Client Documentation
+# Admin Documentation
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Mutations](#mutations)
-  - [createAdminUser](#createadminuser)
-  - [createAdminUSerRequest](#createadminuserrequest)
+  - [Create Admin User](#create-admin-user)
+  - [Create Admin User Request](#create-admin-user-requests)
 - [Queries](#queries)
-  - [loginAdminUser](#loginadminuser) 
-  - [getAdminUsers](#getadminusers)
-  - [getAdminUserRequests](#getadminuserrequests)
+  - [Login Admin User](#login-admin-user) 
+  - [Get Admin Users](#get-admin-users)
+  - [Get Admin User Requests](#get-admin-user-requests)
 
 ## Overview
 
@@ -17,7 +17,7 @@ This documentation cover all adminUser specific implementation done in the proje
 
 ### Mutations:
 
-### createAdminUser
+### Create Admin User
 
 #### Description: 
     Creates a new administrative user in the system with the 
@@ -115,7 +115,7 @@ mutation {
 - Minimal memory usage
 - Atomic ID generation process
 
-### createAdminUserRequests
+### Create Admin User Requests
 #### Description:
 
 Creates a new administrative user request in the system. This function validates 
@@ -143,11 +143,9 @@ mutation {
   createAdminUserRequest(
     email: "mailto:newadmin@example.com"
   ) {
-  id
-  email
-  created_at
-  status
-  updated_at
+    id
+    email
+    created_at
   }
 }
 ```
@@ -211,7 +209,7 @@ mutation {
 
 ### Queries:
 
-### loginAdminUser
+### Login Admin User
 
 #### Description: 
     Authenticates an administrative user in the system using their email 
@@ -301,7 +299,7 @@ mutation {
 - Connection pooling for database operations
 - Cached session management
 
-### getAdminUsers
+### Get Admin Users
 
 #### Description: 
     Retrieves a paginated list of administrative users from the system. 
@@ -411,7 +409,7 @@ query {
 - Proper connection handling
 - Memory-efficient result processing
 
-### getAdminUserRequests
+### Get Admin User Requests
 
 #### Description: 
     Retrieves a paginated list of administrative user requests from the system. 
@@ -427,6 +425,7 @@ query {
 ```
 
 #### Process:
+
 - Validates user authorization and administrator privileges
 - Implements pagination with configurable page size
 - Retrieves total count of requests for pagination metadata
@@ -470,8 +469,7 @@ query {
 {
 "data": {
   "getAdminUserRequests": {
-    "data":
-    {
+    "data": {
       "id": "1",
       "email": "mailto:requestor@example.com",
       "created_at": "2024-01-20T10:00:00Z",

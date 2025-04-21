@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go_server/helper"
 	"go_server/helper/mongoDB"
+	"go_server/helper/projectCategoryReusables"
 	"log"
 	"time"
 
@@ -82,9 +83,9 @@ func GetProjectCategories(params graphql.ResolveParams) (interface{}, error) {
 		}
 	}(cursor, context.Background())
 
-	var projects []helper.ProjectCategoryMongo
+	var projects []projectCategoryReusables.ProjectCategoryMongo
 	for cursor.Next(context.Background()) {
-		var doc helper.ProjectCategoryMongo
+		var doc projectCategoryReusables.ProjectCategoryMongo
 		if err := cursor.Decode(&doc); err != nil {
 			return nil, err
 		}

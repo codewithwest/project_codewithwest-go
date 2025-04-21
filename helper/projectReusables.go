@@ -39,15 +39,6 @@ func GetOptionalString(input map[string]interface{}, key string) string {
 	return ""
 }
 
-func NewProjectCategory(id int, name string) ProjectCategoryMongo {
-	return ProjectCategoryMongo{
-		ID:        id + 1,
-		Name:      name,
-		CreatedAt: GetCurrentDateTime(),
-		UpdatedAt: GetCurrentDateTime(),
-	}
-}
-
 func NewProject(
 	id int,
 	projectCategoryId int,

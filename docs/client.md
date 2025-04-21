@@ -4,15 +4,15 @@
 
 - [Overview](#overview)
 - [Mutations](#mutations)
-  - [CreateAdminUser](#createadminuser) 
+  - [Create Client](#create-client) 
 - [Queries](#queries)
-  - [AuthenticateClient](#authenticateclient) 
+  - [Authenticate Client](#authenticate-client) 
 
 ## Overview
 
 This documentation cover all client specific implementation done in the project.
 
-### CreateAdminUser
+### Create Client
 
 ### Mutations:
 
@@ -97,7 +97,7 @@ mutation {
 
 ### Queries
 
-### AuthenticateClient
+### Authenticate Client
 
 #### Description:
 

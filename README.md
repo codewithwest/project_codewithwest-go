@@ -8,7 +8,7 @@
 - [Installation](#installation)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration)
-- [API Documentation](#api-documentation)
+- [Documentation Structure](#documentation-structure)
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [License](#license)
@@ -22,7 +22,7 @@
 ## Features
 
 - [Client Documentation](./docs/client.md)
-- [Admin Documentation](./docs/adminUser.md) To-do
+- [Admin Documentation](./docs/adminUser.md)
 - [Project Categories Documentation](./docs/project-categories.md) To-do
 - [Projects Documentation](./docs/projects.md) To-do
 
@@ -60,6 +60,33 @@
     docker compose up -d
 
     Access resource on https://localhost:3071/graphql
+
+## Project Structure
+
+## Configuration
+
+## Documentation Structure
+
+    name
+
+    Description:
+    
+    Input Parameters:
+    
+    Process:
+    
+    Sample:
+    
+    Possible Errors:
+    
+    Returns:
+    
+    Security Considerations:
+     
+    Technical Details:
+    
+    Performance Notes:
+
 
 ## Testing
 
