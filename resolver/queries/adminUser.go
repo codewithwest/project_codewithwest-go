@@ -218,7 +218,7 @@ func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
 		SetSkip(int64(skip)).
 		SetSort(bson.D{{Key: "created_at", Value: -1}}) // Sort by creation date, newest first
 
-	fmt.Errorf("total pages: %v", "dwdes")
+	_ = fmt.Errorf("total pages: %v", "dwdes")
 
 	// Execute query
 	cursor, err := collection.Find(ctx, bson.D{}, findOptions)

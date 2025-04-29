@@ -21,10 +21,9 @@ func GetSchema() (graphql.Schema, error) {
 				"loginAdminUser":             admin.GetLoginAdminUserSchema(types.LoginAdminUserType),
 				"getAdminUsers":              admin.GetAdminUsersSchema(types.AdminUsersQueryType),
 				"getAdminUserAccessRequests": admin.GetAdminUserRequests(types.AdminUserRequestQueryType),
-
-				"getProjects":          projects.GetProjects(types.ProjectType),
-				"getProjectCategories": projects.GetProjectCategories(types.ProjectCategoryType),
-				"authenticateClient":   client.AuthenticateClient(types.ClientType),
+				"getProjects":                projects.GetProjects(types.ProjectType),
+				"getProjectCategories":       projects.GetProjectCategories(types.ProjectCategoryRequestQueryType),
+				"authenticateClient":         client.AuthenticateClient(types.ClientType),
 			},
 		}),
 		Mutation: graphql.NewObject(graphql.ObjectConfig{

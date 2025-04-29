@@ -1,6 +1,9 @@
 package types
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/graphql-go/graphql"
+	"go_server/helper"
+)
 
 var ProjectCategoryType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -12,6 +15,9 @@ var ProjectCategoryType = graphql.NewObject(
 			"name": &graphql.Field{
 				Type: graphql.String,
 			},
+			"description": &graphql.Field{
+				Type: graphql.String,
+			},
 			"created_at": &graphql.Field{
 				Type: graphql.String,
 			},
@@ -20,4 +26,9 @@ var ProjectCategoryType = graphql.NewObject(
 			},
 		},
 	},
+)
+
+var ProjectCategoryRequestQueryType = helper.GlobalPaginatedQueryResolver(
+	ProjectCategoryType,
+	"ProjectCategoriesType",
 )

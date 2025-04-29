@@ -1,6 +1,9 @@
 package types
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/graphql-go/graphql"
+	"go_server/helper"
+)
 
 var AdminUserType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -68,31 +71,5 @@ var AdminUserRequestType = graphql.NewObject(
 	},
 )
 
-func adminQueryResolverType(dataType graphql.Type, name string) *graphql.Object {
-	return graphql.NewObject(
-		graphql.ObjectConfig{
-			Name: name,
-			Fields: graphql.Fields{
-				"data": &graphql.Field{
-					Type:        graphql.NewList(dataType),
-					Description: "List of data for the current page",
-				},
-				"page": &graphql.Field{
-					Type:        graphql.Int,
-					Description: "Current page number",
-				},
-				"totalPages": &graphql.Field{
-					Type:        graphql.Int,
-					Description: "Total number of pages available",
-				},
-				"totalItems": &graphql.Field{
-					Type:        graphql.Int,
-					Description: "Total number of items across all pages",
-				},
-			},
-		},
-	)
-}
-
-var AdminUsersQueryType = adminQueryResolverType(AdminUserType, "AdminUsersType")
-var AdminUserRequestQueryType = adminQueryResolverType(AdminUserRequestType, "AdminUserRequestType")
+var AdminUsersQueryType = helper.GlobalPaginatedQueryResolver(AdminUserType, "AdminUsersType")
+var AdminUserRequestQueryType = helper.GlobalPaginatedQueryResolver(AdminUserRequestType, "AdminUserRequestType")

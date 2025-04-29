@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/graphql-go/graphql"
+	"go_server/helper"
 	"go_server/helper/adminUserReusables"
 	"go_server/resolver/queries"
 )
@@ -33,7 +34,7 @@ func GetAdminUserRequests(adminUserType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
 		Name:        "AdminUserRequest",
 		Type:        adminUserType,
-		Args:        adminUserReusables.AdminUserQueriesInput,
+		Args:        helper.GlobalPaginatedQueriesInput,
 		Resolve:     queries.GetAdminUserRequests,
 		Description: "Get all admin user requests",
 	}

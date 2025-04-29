@@ -22,7 +22,7 @@
 ## Features
 
 - [Client Documentation](./docs/client.md)
-- [Admin Documentation](./docs/adminUser.md)
+- [Admin Documentation](./docs/admin-user.md)
 - [Project Categories Documentation](./docs/project-categories.md) To-do
 - [Projects Documentation](./docs/projects.md) To-do
 

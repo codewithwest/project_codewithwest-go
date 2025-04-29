@@ -7,7 +7,6 @@ import (
 )
 
 func CreateProjectCategoryMutation(requiredType *graphql.Object) *graphql.Field {
-
 	return &graphql.Field{
 		Type:        requiredType,
 		Description: "Create a new project category",
@@ -20,7 +19,6 @@ func CreateProjectCategoryMutation(requiredType *graphql.Object) *graphql.Field 
 	}
 }
 func CreateProjectMutation(requiredType *graphql.Object) *graphql.Field {
-
 	return &graphql.Field{
 		Type:        requiredType,
 		Description: "Create a new project",

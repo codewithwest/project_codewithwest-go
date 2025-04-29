@@ -2,6 +2,7 @@ package user
 
 import (
 	"github.com/graphql-go/graphql"
+	"go_server/helper"
 	"go_server/resolver/queries"
 )
 
@@ -22,11 +23,7 @@ func GetUsersSchema(userType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
 		Type:        graphql.NewList(userType),
 		Description: "Get all users",
-		Args: graphql.FieldConfigArgument{
-			"limit": &graphql.ArgumentConfig{
-				Type: graphql.Int,
-			},
-		},
-		Resolve: queries.GetUsers,
+		Args:        helper.GlobalPaginatedQueriesInput,
+		Resolve:     queries.GetUsers,
 	}
 }
