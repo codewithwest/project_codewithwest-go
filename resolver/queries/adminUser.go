@@ -147,10 +147,15 @@ func GetAdminUsers(params graphql.ResolveParams) (interface{}, error) {
 	totalPages := int32(math.Ceil(float64(totalItems) / float64(limit)))
 
 	return &adminUserReusables.AdminUsersResponse{
-		Data:       adminUsers,
-		Page:       page,
-		TotalPages: totalPages,
-		TotalItems: int32(totalItems),
+		Data: adminUsers,
+		Pagination: helper.Pagination{
+			CurrentPage: int(page),
+			PerPage:     int(limit),
+			Count:       int(totalItems),
+			Offset:      0,
+			TotalPages:  int(totalPages),
+			TotalItems:  int(totalItems),
+		},
 	}, nil
 }
 
@@ -243,12 +248,17 @@ func GetAdminUserRequests(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("error decoding requests: %w", err)
 	}
 
-	totalPages := int32(math.Ceil(float64(totalItems) / float64(limit)))
+	totalPages := int(math.Ceil(float64(totalItems) / float64(limit)))
 
 	return &adminUserReusables.AdminUsersRequestResponse{
-		Data:       adminUserRequests,
-		Page:       page,
-		TotalPages: totalPages,
-		TotalItems: int32(totalItems),
+		Data: adminUserRequests,
+		Pagination: helper.Pagination{
+			CurrentPage: int(page),
+			PerPage:     int(limit),
+			Count:       int(totalItems),
+			Offset:      0,
+			TotalPages:  totalPages,
+			TotalItems:  int(totalItems),
+		},
 	}, nil
 }

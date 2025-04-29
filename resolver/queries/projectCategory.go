@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"github.com/graphql-go/graphql"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go_server/helper"
 	"go_server/helper/mongoDB"
 	"go_server/helper/projectCategoryReusables"
 	"math"
+	"sync"
 	"time"
 )
 
@@ -69,7 +71,12 @@ func GetProjectCategories(params graphql.ResolveParams) (interface{}, error) {
 	if errFind != nil {
 		return nil, fmt.Errorf("error finding documents: %v", errFind)
 	}
-	defer cursor.Close(ctx)
+	defer func(cursor *mongo.Cursor, ctx context.Context) {
+		err := cursor.Close(ctx)
+		if err != nil {
+
+		}
+	}(cursor, ctx)
 
 	// Pre-allocate slice with capacity
 	projects := make([]projectCategoryReusables.ProjectCategoryMongo, 0, limit)

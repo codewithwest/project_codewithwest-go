@@ -1,6 +1,9 @@
 package adminUserReusables
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/graphql-go/graphql"
+	"go_server/helper"
+)
 
 type AdminUserRequestMongo struct {
 	ID        int    `json:"id" bson:"id"`
@@ -9,16 +12,12 @@ type AdminUserRequestMongo struct {
 }
 type AdminUsersResponse struct {
 	Data       []AdminUserInputMongo `json:"data"`
-	Page       int32                 `json:"page"`
-	TotalPages int32                 `json:"totalPages"`
-	TotalItems int32                 `json:"totalItems"`
+	Pagination helper.Pagination     `json:"pagination"`
 }
 
 type AdminUsersRequestResponse struct {
 	Data       []AdminUserRequestMongo `json:"data"`
-	Page       int32                   `json:"page"`
-	TotalPages int32                   `json:"totalPages"`
-	TotalItems int32                   `json:"totalItems"`
+	Pagination helper.Pagination       `json:"pagination"`
 }
 
 var AdminUserQueriesInput = graphql.FieldConfigArgument{
