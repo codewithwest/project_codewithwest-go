@@ -2,7 +2,7 @@ package projects
 
 import (
 	"github.com/graphql-go/graphql"
-	"go_server/helper"
+	"go_server/helper/projectReusables"
 	"go_server/resolver/mutations"
 )
 
@@ -18,13 +18,14 @@ func CreateProjectCategoryMutation(requiredType *graphql.Object) *graphql.Field 
 		Resolve: mutations.CreateProjectCategory,
 	}
 }
+
 func CreateProjectMutation(requiredType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
 		Type:        requiredType,
 		Description: "Create a new project",
 		Args: graphql.FieldConfigArgument{
 			"input": &graphql.ArgumentConfig{
-				Type:        graphql.NewNonNull(helper.ProjectInput),
+				Type:        graphql.NewNonNull(projectReusables.ProjectInput),
 				Description: "Project input",
 			},
 		},

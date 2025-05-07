@@ -16,8 +16,7 @@ import (
 )
 
 func GetProjectCategories(params graphql.ResolveParams) (interface{}, error) {
-	// Use type assertions with direct error handling
-	limit, page := 10, 1 // Default values
+	limit, page := 10, 1
 	if l, ok := params.Args["limit"].(int); ok {
 		limit = l
 	} else {
@@ -28,17 +27,14 @@ func GetProjectCategories(params graphql.ResolveParams) (interface{}, error) {
 		page = p
 	}
 
-	// Create a shorter context timeout - 30 seconds should be sufficient
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// Get collection with connection pooling
 	collection, err := mongoDB.ConnectMongoDB("project_categories")
 	if err != nil {
 		return nil, fmt.Errorf("database connection error: %v", err)
 	}
 
-	// Perform count and find operations concurrently
 	var (
 		totalCount int64
 		cursor     *mongo.Cursor
@@ -64,24 +60,22 @@ func GetProjectCategories(params graphql.ResolveParams) (interface{}, error) {
 
 	wg.Wait()
 
-	// Check for errors from concurrent operations
 	if errCount != nil {
 		return nil, fmt.Errorf("error counting documents: %v", errCount)
 	}
+
 	if errFind != nil {
 		return nil, fmt.Errorf("error finding documents: %v", errFind)
 	}
+
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
 		err := cursor.Close(ctx)
 		if err != nil {
-
 		}
 	}(cursor, ctx)
 
-	// Pre-allocate slice with capacity
 	projects := make([]projectCategoryReusables.ProjectCategoryMongo, 0, limit)
 
-	// Use cursor.All() instead of iterating manually
 	if err := cursor.All(ctx, &projects); err != nil {
 		return nil, fmt.Errorf("error decoding documents: %v", err)
 	}

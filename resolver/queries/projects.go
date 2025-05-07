@@ -3,8 +3,8 @@ package queries
 import (
 	"context"
 	"fmt"
-	"go_server/helper"
 	"go_server/helper/mongoDB"
+	"go_server/helper/projectReusables"
 	"log"
 	"time"
 
@@ -41,9 +41,9 @@ func GetProjects(params graphql.ResolveParams) (interface{}, error) {
 		}
 	}(cursor, context.Background())
 
-	var projects []helper.ProjectMongo
+	var projects []projectReusables.ProjectMongo
 	for cursor.Next(context.Background()) {
-		var doc helper.ProjectMongo
+		var doc projectReusables.ProjectMongo
 		if err := cursor.Decode(&doc); err != nil {
 			return nil, err
 		}

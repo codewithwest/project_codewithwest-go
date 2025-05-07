@@ -1,4 +1,4 @@
-package helper
+package projectReusables
 
 type ProjectMongo struct {
 	ID                int      `json:"id" bson:"id"`

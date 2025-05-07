@@ -44,7 +44,6 @@ func GetEnvVariable(searchValue string) string {
 
 func GetCurrentDateTime() string {
 	resolvedTime := time.Now()
-	// Or specify a specific location like "Africa/Johannesburg"\
 	local, err := time.LoadLocation("Local")
 
 	if err != nil {

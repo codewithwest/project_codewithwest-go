@@ -4,42 +4,23 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go_server/helper"
 	"go_server/helper/mongoDB"
+	"go_server/helper/projectReusables"
 	"log"
 	"time"
 
 	"github.com/graphql-go/graphql"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func CreateProject(params graphql.ResolveParams) (interface{}, error) {
-	inputArg, isInput := params.Args["input"].(map[string]interface{})
-	if !isInput {
-		return nil, fmt.Errorf("invalid Input arguments")
+	projectData, err := projectReusables.ValidateCreateProjectInput(params)
+	if err != nil {
+		return nil, fmt.Errorf("input validation failed: %w", err)
 	}
 
-	name, isname := inputArg["name"].(string)
-	projectCategoryId, isProjectCategoryId := inputArg["project_category_id"].(int)
-	description, isDescription := inputArg["description"].(string)
-	techStacksInterface, isTechStacks := inputArg["tech_stacks"].([]interface{})
-
-	if !isname || !isProjectCategoryId || !isDescription || !isTechStacks {
-		return nil, fmt.Errorf("missing required argument(s)")
-	}
-
-	techStacksList := make([]string, len(techStacksInterface))
-	for position, value := range techStacksInterface {
-		str, ok := value.(string)
-		if !ok {
-			return nil, fmt.Errorf("tech_stacks element at index %d is not a string, but a %T", position, value) // Include index and type!
-		}
-		techStacksList[position] = str
-	}
-
-	projectCategoryCollection, err := mongoDB.ConnectMongoDB("project_categories") // Replace placeholders
+	projectCategoryCollection, err := mongoDB.ConnectMongoDB("project_categories")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,33 +29,34 @@ func CreateProject(params graphql.ResolveParams) (interface{}, error) {
 		ID int `bson:"id" json:"id"`
 	}
 
-	err = projectCategoryCollection.FindOne(context.TODO(), bson.M{"id": projectCategoryId}, options.FindOne()).Decode(&projectCategoryResult)
-	if err != nil {
+	if err := projectCategoryCollection.FindOne(context.TODO(),
+		bson.M{"id": projectData.ProjectCategoryId}).Decode(&projectCategoryResult); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, fmt.Errorf("project category does not exist")
+			return nil, fmt.Errorf("project category with ID %d does not exist",
+				projectData.ProjectCategoryId)
 		}
+		return nil, fmt.Errorf("error checking project category: %w", err)
 	}
 
-	projectCollection, err := mongoDB.ConnectMongoDB("projects") // Replace placeholders
+	projectCollection, err := mongoDB.ConnectMongoDB("projects")
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	projectId, userIdError := mongoDB.GetHighestIdInCollection(projectCollection)
 	if userIdError != nil {
 		return nil, userIdError
 	}
+	projectData.ID = projectId
 
-	project := helper.NewProject(
-		projectId, projectCategoryId, name,
-		description, techStacksList, inputArg,
-	)
+	project := projectReusables.NewProject(projectData)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	_, err = projectCollection.InsertOne(ctx, project)
 	if err != nil {
-		return nil, fmt.Errorf("failed to project category: %w", err)
+		return nil, fmt.Errorf("failed to create project: %w", err)
 	}
 
 	return project, nil

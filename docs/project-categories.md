@@ -133,7 +133,7 @@ Returns both category data and pagination metadata for client-side navigation.
 - Calculates pagination metadata
 - Returns combined category and pagination data
 
-Sample:
+### Sample:
 
 ```
   query {
@@ -158,21 +158,16 @@ Sample:
       }
   }
 ```
-            
-Possible Errors:
-invalid or missing limit argument - Pagination parameter validation failed
 
-database connection error - MongoDB connection issues
+### Possible Errors:
+- invalid or missing limit argument - Pagination parameter validation failed
+- database connection error - MongoDB connection issues
+- error counting documents - Total count operation failed
+- error finding documents - Document retrieval failed
+- error decoding documents - Document parsing failed
+- context timeout - Operation exceeded time limit
 
-error counting documents - Total count operation failed
-
-error finding documents - Document retrieval failed
-
-error decoding documents - Document parsing failed
-
-context timeout - Operation exceeded time limit
-
-Returns:
+### Returns:
 
 ```
 {

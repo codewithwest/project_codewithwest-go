@@ -13,8 +13,8 @@ func GetLoginAdminUserSchema(adminUserType *graphql.Object) *graphql.Field {
 		Description: "Login admin user by email",
 		Args: graphql.FieldConfigArgument{
 			"input": &graphql.ArgumentConfig{
-				Type:        graphql.NewNonNull(adminUserReusables.AdminUserInputDef), // Use the InputObject here
-				Description: "Input for creating an admin user",                       // Description for the "input" argument
+				Type:        graphql.NewNonNull(adminUserReusables.AdminUserInputDef),
+				Description: "Input for creating an admin user",
 			},
 		},
 		Resolve: queries.LoginAdminUser,
