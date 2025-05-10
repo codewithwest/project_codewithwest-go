@@ -1,6 +1,9 @@
 package types
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/graphql-go/graphql"
+	"go_server/helper"
+)
 
 var AdminUserType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -10,9 +13,6 @@ var AdminUserType = graphql.NewObject(
 				Type: graphql.String,
 			},
 			"username": &graphql.Field{
-				Type: graphql.String,
-			},
-			"password": &graphql.Field{
 				Type: graphql.String,
 			},
 			"email": &graphql.Field{
@@ -51,7 +51,8 @@ var LoginAdminUserType = graphql.NewObject(
 				Type: graphql.String,
 			},
 		},
-	})
+	},
+)
 
 var AdminUserRequestType = graphql.NewObject(
 	graphql.ObjectConfig{
@@ -67,4 +68,8 @@ var AdminUserRequestType = graphql.NewObject(
 				Type: graphql.String,
 			},
 		},
-	})
+	},
+)
+
+var AdminUsersQueryType = helper.GlobalPaginatedQueryResolver(AdminUserType, "AdminUsersType")
+var AdminUserRequestQueryType = helper.GlobalPaginatedQueryResolver(AdminUserRequestType, "AdminUserRequestType")

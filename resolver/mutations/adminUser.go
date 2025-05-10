@@ -7,6 +7,7 @@ import (
 	"go_server/helper/adminUserReusables"
 	"go_server/helper/mongoDB"
 	"log"
+	"strconv"
 	"time"
 
 	"github.com/graphql-go/graphql"
@@ -16,27 +17,24 @@ import (
 
 func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 
-	userValues, validationError := adminUserReusables.ValidateAdminUserInput(
+	adminUserInputData, validationError := adminUserReusables.ValidateAdminUserInput(
 		params)
 	if validationError != nil {
 		return nil, validationError
 	}
-	email := userValues[0]
-	password := userValues[1]
-	username := userValues[2]
 
 	collection, err := mongoDB.ConnectMongoDB("admin_users")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	hashedPassword, isPassword := helper.HashPassword(password)
+	hashedPassword, isPassword := helper.HashPassword(adminUserInputData.Password)
 	if !isPassword {
 		return nil, fmt.Errorf("oops! something went wrong on our side while creating your password! Please contact support")
 	}
 
 	emailExist, isEmailExists := mongoDB.EmailExist(
-		collection, email)
+		collection, adminUserInputData.Email)
 
 	if isEmailExists != nil {
 		return nil, fmt.Errorf("failed to convert inserted ID to ObjectID %s", isEmailExists)
@@ -50,7 +48,8 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, userIdError
 	}
 
-	user := adminUserReusables.NewAdminUser(userId, username, email, hashedPassword)
+	adminUserInputData.Password = hashedPassword
+	user := adminUserReusables.NewAdminUser(userId, adminUserInputData)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -77,12 +76,14 @@ func CreateAdminUser(params graphql.ResolveParams) (interface{}, error) {
 }
 
 func CreateAdminUserRequest(params graphql.ResolveParams) (interface{}, error) {
-	session := params.Context.Value("session").(*mongoDB.Session)
-	// log session
-	log.Println(session)
+	isAuthorized, err := mongoDB.UserDataAccessIsAuthorized(params)
+	if err != nil {
+		return nil, fmt.Errorf("not authorized: %w", err)
+	}
 
-	if session == nil {
-		return nil, fmt.Errorf("missing session")
+	_, err = strconv.Atoi(isAuthorized)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user id: %w", err)
 	}
 
 	email, isEmail := params.Args["email"].(string)
@@ -90,7 +91,7 @@ func CreateAdminUserRequest(params graphql.ResolveParams) (interface{}, error) {
 	if !isEmail {
 		return nil, fmt.Errorf("missing required argument(s)")
 	}
-	_, err := helper.ValidateEmailAddress(email)
+	_, err = helper.ValidateEmailAddress(email)
 	if err != nil {
 		return nil, err
 	}
@@ -115,13 +116,13 @@ func CreateAdminUserRequest(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("email already exists")
 	}
 
-	newRequestUser := adminUserReusables.AdminUserRequest{
+	newRequestUser := adminUserReusables.AdminUserRequestMongo{
 		ID:        userId + 1,
 		Email:     email,
 		CreatedAt: helper.GetCurrentDateTime(),
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	_, err = collection.InsertOne(ctx, newRequestUser)

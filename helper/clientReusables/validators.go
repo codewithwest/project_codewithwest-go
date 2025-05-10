@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-// ValidateClientInput
-
 func ValidateClientInput(params graphql.ResolveParams) (*ClientInputData, error) {
 	// Use a type assertion with direct error checking
 	inputArg, ok := params.Args["input"].(map[string]interface{})
@@ -32,9 +30,11 @@ func ValidateClientInput(params graphql.ResolveParams) (*ClientInputData, error)
 	if !isEmail {
 		validationErrors = append(validationErrors, "email")
 	}
+
 	if !isPassword {
 		validationErrors = append(validationErrors, "password")
 	}
+
 	if !isCompanyName {
 		validationErrors = append(validationErrors, "company_name")
 	}

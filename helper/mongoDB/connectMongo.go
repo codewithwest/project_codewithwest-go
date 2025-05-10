@@ -90,6 +90,7 @@ func NameExists(collection *mongo.Collection, name string) (bool, error) {
 	}
 
 	err := collection.FindOne(context.Background(), bson.M{"name": name}).Decode(&NameType)
+
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return false, nil

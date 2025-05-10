@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/graphql-go/graphql"
 	"go_server/helper"
-	"log"
 	"net/http"
 	"time"
 
@@ -160,7 +159,7 @@ func UserDataAccessIsAuthorized(params graphql.ResolveParams) (string, error) {
 		return "", fmt.Errorf("http.Request not found in context")
 	}
 
-	validSignature, isValidSignatureErr := GetSessionFromRequest(request, "Authentication")
+	validSignature, isValidSignatureErr := GetSessionFromRequest(request, "Authorization")
 	if isValidSignatureErr != nil || validSignature == nil {
 		return "", isValidSignatureErr
 	}
@@ -168,8 +167,6 @@ func UserDataAccessIsAuthorized(params graphql.ResolveParams) (string, error) {
 
 	if userId == "" {
 		return "", fmt.Errorf("userId header missing")
-	} else {
-		log.Printf("userId header: %s", userId)
 	}
 
 	return userId, nil

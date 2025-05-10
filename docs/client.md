@@ -3,23 +3,23 @@
 ## Table of Contents
 
 - [Overview](#overview)
-- [Usages](#usages)
-  - [Mutations](#mutations)
-  - [Queries](#queries)
+- [Mutations](#mutations)
+  - [Create Client](#create-client) 
+- [Queries](#queries)
+  - [Authenticate Client](#authenticate-client) 
 
 ## Overview
 
 This documentation cover all client specific implementation done in the project.
 
-## Usages
+### Create Client
 
 ### Mutations:
 
-#### **_CreateClient_**
-
 #### Description:
 
-Creates a new client in the system with the provided information and returns the created client data along with a session token.
+Creates a new client in the system with the provided information and returns the 
+created client data along with a session token.
 
 #### Input Parameters:
 
@@ -97,7 +97,7 @@ mutation {
 
 ### Queries
 
-***AuthenticateClient***
+### Authenticate Client
 
 #### Description:
 
@@ -181,7 +181,7 @@ mutation {
 
 #### Technical Details:
 
-- Context Timeout: 10 seconds
+- Context Timeout: 30 seconds
 - Database Collection: "clients"
 
 #### required Dependencies:
@@ -198,8 +198,5 @@ mutation {
 - Minimal memory usage
 - Streamlined authentication process
 - Single database query implementation
-
-
-
 
 [Back to main](../README.md#features)

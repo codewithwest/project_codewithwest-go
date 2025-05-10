@@ -9,7 +9,7 @@ import (
 
 func CreateAdminUserMutation(requiredType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
-		Type:        requiredType, // Return the user type after creation
+		Type:        requiredType,
 		Description: "Create a new admin user",
 		Args: graphql.FieldConfigArgument{
 			"input": &graphql.ArgumentConfig{ // Wrap it in a FieldConfigArgument

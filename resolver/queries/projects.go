@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"go_server/helper"
 	"go_server/helper/mongoDB"
+	"go_server/helper/projectReusables"
 	"log"
+	"math"
+	"sync"
 	"time"
 
 	"github.com/graphql-go/graphql"
@@ -15,84 +18,80 @@ import (
 )
 
 func GetProjects(params graphql.ResolveParams) (interface{}, error) {
-
-	limit, ok := params.Args["limit"].(int)
-	if !ok {
-		return nil, fmt.Errorf("missing limit Argument")
+	limit, page := 10, 1
+	if resolvedLimit, ok := params.Args["limit"].(int); ok {
+		limit = resolvedLimit
+	} else {
+		return nil, fmt.Errorf("invalid or missing limit argument")
 	}
+
+	if resolvedPage, ok := params.Args["page"].(int); ok && resolvedPage > 0 {
+		page = resolvedPage
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
 	collection, err := mongoDB.ConnectMongoDB("projects")
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("database connection error: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
+	var (
+		totalCount int64
+		cursor     *mongo.Cursor
+		errCount   error
+		errFind    error
+		waitGroup  sync.WaitGroup
+	)
 
-	findOptions := options.Find().SetLimit(int64(limit))
-	cursor, err := collection.Find(ctx, bson.D{}, findOptions)
-	if err != nil {
-		log.Fatal(err)
+	waitGroup.Add(2)
+	go func() {
+		defer waitGroup.Done()
+		totalCount, errCount = collection.CountDocuments(ctx, bson.D{})
+	}()
+
+	go func() {
+		defer waitGroup.Done()
+		skip := int64((page - 1) * limit)
+		findOptions := options.Find().
+			SetSkip(skip).
+			SetLimit(int64(limit))
+		cursor, errFind = collection.Find(ctx, bson.D{}, findOptions)
+	}()
+	waitGroup.Wait()
+
+	if errCount != nil {
+		return nil, fmt.Errorf("error counting documents: %v", errCount)
 	}
+
+	if errFind != nil {
+		return nil, fmt.Errorf("error finding documents: %v", errFind)
+	}
+
 	defer func(cursor *mongo.Cursor, ctx context.Context) {
-		err := cursor.Close(ctx)
-		if err != nil {
-
+		if err := cursor.Close(ctx); err != nil {
+			log.Printf("error closing cursor: %v", err)
 		}
-	}(cursor, context.Background())
+	}(cursor, ctx)
 
-	var projects []helper.ProjectMongo
-	for cursor.Next(context.Background()) {
-		var doc helper.ProjectMongo
-		if err := cursor.Decode(&doc); err != nil {
-			return nil, err
-		}
-		projects = append(projects, doc)
-	}
-	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
-	}
-	return projects, nil
-}
+	projects := make([]projectReusables.ProjectMongo, 0, limit)
 
-func GetProjectCategories(params graphql.ResolveParams) (interface{}, error) {
-
-	limit, ok := params.Args["limit"].(int)
-	if !ok {
-		return nil, fmt.Errorf("missing limit Argument")
+	if err := cursor.All(ctx, &projects); err != nil {
+		return nil, fmt.Errorf("error decoding documents: %v", err)
 	}
 
-	collection, err := mongoDB.ConnectMongoDB("project_categories")
-	if err != nil {
-		log.Fatal(err)
-	}
+	totalPages := int(math.Ceil(float64(totalCount) / float64(limit)))
 
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-
-	findOptions := options.Find().SetLimit(int64(limit))
-	cursor, err := collection.Find(ctx, bson.D{}, findOptions)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer func(cursor *mongo.Cursor, ctx context.Context) {
-		err := cursor.Close(ctx)
-		if err != nil {
-
-		}
-	}(cursor, context.Background())
-
-	var projects []helper.ProjectCategoryMongo
-	for cursor.Next(context.Background()) {
-		var doc helper.ProjectCategoryMongo
-		if err := cursor.Decode(&doc); err != nil {
-			return nil, err
-		}
-		projects = append(projects, doc)
-	}
-	if err := cursor.Err(); err != nil {
-		log.Fatal(err)
-	}
-
-	return projects, nil
+	return &projectReusables.ProjectResponse{
+		Data: projects,
+		Pagination: helper.Pagination{
+			CurrentPage: page,
+			PerPage:     limit,
+			Count:       int(totalCount),
+			Offset:      (page - 1) * limit,
+			TotalPages:  totalPages,
+			TotalItems:  int(totalCount),
+		},
+	}, nil
 }
