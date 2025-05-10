@@ -9,14 +9,10 @@ import (
 
 func GetProjects(projectsType *graphql.Object) *graphql.Field {
 	return &graphql.Field{
-		Type:        graphql.NewList(projectsType),
+		Type:        projectsType,
 		Description: "Get all projects",
-		Args: graphql.FieldConfigArgument{
-			"limit": &graphql.ArgumentConfig{
-				Type: graphql.Int,
-			},
-		},
-		Resolve: queries.GetProjects,
+		Args:        helper.GlobalPaginatedQueriesInput,
+		Resolve:     queries.GetProjects,
 	}
 }
 

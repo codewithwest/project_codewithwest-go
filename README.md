@@ -10,8 +10,6 @@
 - [Configuration](#configuration)
 - [Documentation Structure](#documentation-structure)
 - [Testing](#testing)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Overview
 
@@ -24,7 +22,7 @@
 - [Client Documentation](./docs/client.md)
 - [Admin Documentation](./docs/admin-user.md)
 - [Project Categories Documentation](./docs/project-categories.md)
-- [Projects Documentation](./docs/projects.md) In-Progress
+- [Projects Documentation](./docs/projects.md)
 
 ## Prerequisites
 

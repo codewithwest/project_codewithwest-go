@@ -60,14 +60,17 @@ func NewProject(
 	}
 }
 
+type ProjectResponse struct {
+	Data       []ProjectMongo    `json:"projectCategory"`
+	Pagination helper.Pagination `json:"pagination"`
+}
+
 func ValidateCreateProjectInput(params graphql.ResolveParams) (*ProjectMongo, error) {
-	// Use a single type assertion check for the input map
 	inputArg, ok := params.Args["input"].(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("invalid input arguments")
 	}
 
-	// Create a validation struct to hold required fields
 	required := struct {
 		name              string
 		projectCategoryId int
@@ -75,7 +78,6 @@ func ValidateCreateProjectInput(params graphql.ResolveParams) (*ProjectMongo, er
 		techStacks        []string
 	}{}
 
-	// Validate required fields with more specific error messages
 	var err error
 	if required.name, ok = inputArg["name"].(string); !ok {
 		err = fmt.Errorf("name is required and must be a string")
