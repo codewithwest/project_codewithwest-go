@@ -10,7 +10,7 @@ type ProjectCategoryMongo struct {
 }
 
 type ProjectCategoryResponse struct {
-	Data       []ProjectCategoryMongo `json:"projectCategory"`
+	Data       []ProjectCategoryMongo `json:"data"`
 	Pagination helper.Pagination      `json:"pagination"`
 }
 

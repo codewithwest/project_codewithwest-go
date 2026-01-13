@@ -2,8 +2,9 @@ package projectReusables
 
 import (
 	"fmt"
-	"github.com/graphql-go/graphql"
 	"go_server/helper"
+
+	"github.com/graphql-go/graphql"
 )
 
 var ProjectInput = graphql.NewInputObject(graphql.InputObjectConfig{
@@ -61,7 +62,7 @@ func NewProject(
 }
 
 type ProjectResponse struct {
-	Data       []ProjectMongo    `json:"projectCategory"`
+	Data       []ProjectMongo    `json:"data"`
 	Pagination helper.Pagination `json:"pagination"`
 }
 

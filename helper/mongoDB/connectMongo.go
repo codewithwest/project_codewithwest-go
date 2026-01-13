@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go_server/helper"
-	"go_server/helper/adminUserReusables"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -52,7 +51,7 @@ func GetHighestIdInCollection(collection *mongo.Collection) (int, error) {
 
 	opts := options.FindOne().SetSort(bson.D{{Key: "id", Value: -1}})
 
-	var result adminUserReusables.AdminUserInputMongo
+	var result map[string]interface{}
 	err := collection.FindOne(context.Background(), bson.D{}, opts).Decode(&result)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
@@ -62,7 +61,22 @@ func GetHighestIdInCollection(collection *mongo.Collection) (int, error) {
 		return 0, fmt.Errorf("error! finding highest ID: %w", err)
 	}
 
-	return result.ID, nil
+	id, ok := result["id"].(int32)
+	if !ok {
+		// MongoDB sometimes decodes as float64 or int64 depending on the driver/data
+		if id64, ok := result["id"].(int64); ok {
+			return int(id64), nil
+		}
+		if idFloat, ok := result["id"].(float64); ok {
+			return int(idFloat), nil
+		}
+		// Fallback for int
+		if idInt, ok := result["id"].(int); ok {
+			return idInt, nil
+		}
+	}
+
+	return int(id), nil
 }
 
 func EmailExist(collection *mongo.Collection, email string) (bool, error) {

@@ -2,12 +2,13 @@ package auth
 
 import (
 	"encoding/json"
-	"github.com/rs/zerolog"
 	"go_server/helper"
 	"go_server/helper/mongoDB"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/rs/zerolog"
 )
 
 var LOGGER zerolog.Logger
