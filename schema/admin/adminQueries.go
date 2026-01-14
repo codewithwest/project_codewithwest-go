@@ -1,10 +1,11 @@
 package admin
 
 import (
-	"github.com/graphql-go/graphql"
 	"go_server/helper"
 	"go_server/helper/adminUserReusables"
 	"go_server/resolver/queries"
+
+	"github.com/graphql-go/graphql"
 )
 
 func GetLoginAdminUserSchema(adminUserType *graphql.Object) *graphql.Field {
@@ -13,8 +14,8 @@ func GetLoginAdminUserSchema(adminUserType *graphql.Object) *graphql.Field {
 		Description: "Login admin user by email",
 		Args: graphql.FieldConfigArgument{
 			"input": &graphql.ArgumentConfig{
-				Type:        graphql.NewNonNull(adminUserReusables.AdminUserInputDef),
-				Description: "Input for creating an admin user",
+				Type:        graphql.NewNonNull(adminUserReusables.AdminLoginInputDef),
+				Description: "Input for admin user login",
 			},
 		},
 		Resolve: queries.LoginAdminUser,

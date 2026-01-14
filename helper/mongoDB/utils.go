@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,4 +22,14 @@ func GenerateSecureToken() (string, error) {
 // GenerateObjectID generates a new MongoDB ObjectID as a string
 func GenerateObjectID() string {
 	return primitive.NewObjectID().Hex()
+}
+
+// CreateBSONID creates a filter for MongoDB _id
+func CreateBSONID(id string) bson.M {
+	return bson.M{"_id": id}
+}
+
+// CreateBSONUpdate creates a $set update for MongoDB
+func CreateBSONUpdate(key string, value interface{}) bson.M {
+	return bson.M{"$set": bson.M{key: value}}
 }

@@ -20,9 +20,16 @@ import (
 )
 
 func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
-	adminUserLoginData, validationError := adminUserReusables.ValidateAdminUserInput(params)
-	if validationError != nil {
-		return nil, validationError
+	inputArg, ok := params.Args["input"].(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid input arguments")
+	}
+
+	identifier, _ := inputArg["identifier"].(string)
+	password, _ := inputArg["password"].(string)
+
+	if identifier == "" || password == "" {
+		return nil, fmt.Errorf("invalid identifier or password")
 	}
 
 	collection, dbConnError := mongoDB.ConnectMongoDB("admin_users")
@@ -34,10 +41,17 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	defer cancel()
 
 	var adminUser adminUserReusables.AdminUserInputMongo
-	findUserError := collection.FindOne(ctx, bson.M{"email": adminUserLoginData.Email}).Decode(&adminUser)
+	// Search by email OR username
+	filter := bson.M{
+		"$or": []bson.M{
+			{"email": identifier},
+			{"username": identifier},
+		},
+	}
+	findUserError := collection.FindOne(ctx, filter).Decode(&adminUser)
 	if findUserError != nil {
 		if errors.Is(findUserError, mongo.ErrNoDocuments) {
-			return nil, fmt.Errorf("invalid email or password combination")
+			return nil, fmt.Errorf("invalid identifier or password combination")
 		}
 		return nil, fmt.Errorf("internal server error: %w", findUserError)
 	}
@@ -46,11 +60,11 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 		return nil, fmt.Errorf("invalid email or password combination")
 	}
 
-	if !helper.ValidatePassword(adminUserLoginData.Password, *adminUser.Password) {
-		return nil, fmt.Errorf("invalid email or password combination")
+	if !helper.ValidatePassword(password, *adminUser.Password) {
+		return nil, fmt.Errorf("invalid identifier or password combination")
 	}
 
-	session, sessionError := mongoDB.CreateSession(strconv.Itoa(adminUser.ID), adminUserLoginData.Email, false)
+	session, sessionError := mongoDB.CreateSession(strconv.Itoa(adminUser.ID), identifier, false)
 	if sessionError != nil {
 		return nil, fmt.Errorf("session creation failed: %w", sessionError)
 	}
@@ -58,7 +72,7 @@ func LoginAdminUser(params graphql.ResolveParams) (interface{}, error) {
 	return map[string]interface{}{
 		"token": session.Token,
 		"id":    strconv.Itoa(adminUser.ID),
-		"email": adminUserLoginData.Email,
+		"email": adminUser.Email,
 	}, nil
 }
 

@@ -1,8 +1,9 @@
 package adminUserReusables
 
 import (
-	"github.com/graphql-go/graphql"
 	"go_server/helper"
+
+	"github.com/graphql-go/graphql"
 )
 
 var AdminUserInputDef = graphql.NewInputObject(graphql.InputObjectConfig{ // Create and return the InputObject directly
@@ -16,6 +17,21 @@ var AdminUserInputDef = graphql.NewInputObject(graphql.InputObjectConfig{ // Cre
 		"email": &graphql.InputObjectFieldConfig{
 			Type:        graphql.NewNonNull(graphql.String),
 			Description: "Email of the user",
+		},
+		"password": &graphql.InputObjectFieldConfig{
+			Type:        graphql.NewNonNull(graphql.String),
+			Description: "Password of the user",
+		},
+	},
+})
+
+var AdminLoginInputDef = graphql.NewInputObject(graphql.InputObjectConfig{
+	Name:        "AdminLoginInput",
+	Description: "Input for admin user login",
+	Fields: graphql.InputObjectConfigFieldMap{
+		"identifier": &graphql.InputObjectFieldConfig{
+			Type:        graphql.NewNonNull(graphql.String),
+			Description: "Email or Username of the user",
 		},
 		"password": &graphql.InputObjectFieldConfig{
 			Type:        graphql.NewNonNull(graphql.String),

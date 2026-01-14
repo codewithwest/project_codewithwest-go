@@ -77,6 +77,6 @@ func EnableCors(w *http.ResponseWriter) {
 
 	header.Add("Access-Control-Allow-Origin", allowedOrigins)
 	header.Add("Access-Control-Allow-Methods", "DELETE, POST, GET, OPTIONS")
-	header.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, Signature, user_id") // Add "signature"
+	header.Add("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-API-Key, Signature, user_id")
 	header.Add("Access-Control-Allow-Credentials", "true")
 }

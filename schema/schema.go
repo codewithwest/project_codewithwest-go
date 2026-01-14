@@ -3,6 +3,8 @@ package schema
 import (
 	"go_server/schema/admin"
 	"go_server/schema/client"
+	"go_server/schema/contact"
+	"go_server/schema/integration"
 	"go_server/schema/projects"
 	"go_server/types"
 
@@ -20,6 +22,8 @@ func GetSchema() (graphql.Schema, error) {
 				"getProjects":                projects.GetProjects(types.ProjectRequestQueryType),
 				"getProjectCategories":       projects.GetProjectCategories(types.ProjectCategoryRequestQueryType),
 				"authenticateClient":         client.AuthenticateClient(types.ClientType),
+				"getContactMessages":         contact.GetContactMessagesSchema(types.ContactMessageRequestQueryType),
+				"getIntegrations":            integration.GetIntegrationsSchema,
 			},
 		}),
 		Mutation: graphql.NewObject(graphql.ObjectConfig{
@@ -30,6 +34,9 @@ func GetSchema() (graphql.Schema, error) {
 				"createProject":          projects.CreateProjectMutation(types.ProjectType),
 				"adminUserAccessRequest": admin.RequestAdminAccess(types.AdminUserRequestType),
 				"createClient":           client.CreateClientMutation(types.ClientType),
+				"createContactMessage":   contact.CreateContactMessageMutation(types.ContactMessageType),
+				"createIntegration":      integration.CreateIntegrationMutation,
+				"revokeIntegration":      integration.RevokeIntegrationMutation,
 			},
 		}),
 	})

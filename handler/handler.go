@@ -2,13 +2,14 @@ package handler
 
 import (
 	"context"
-	"github.com/gorilla/mux"
-	"github.com/rs/zerolog"
 	"go_server/api"
 	"go_server/helper/auth"
 	"go_server/schema"
 	"net/http"
 	"os"
+
+	"github.com/gorilla/mux"
+	"github.com/rs/zerolog"
 )
 
 func init() {
@@ -35,7 +36,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	mainController := &api.MainController{Schema: schemaObj}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/graphql", auth.ValidateSession(
+	router.HandleFunc("/graphql", auth.ValidateIntegrationToken(auth.ValidateSession(
 		func(w http.ResponseWriter, r *http.Request) {
 			if r.Method == "OPTIONS" {
 				auth.LOGGER.Info().Msg("OPTIONS request received")
@@ -46,7 +47,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			r = r.WithContext(ctx)
 
 			mainController.GetData().ServeHTTP(w, r)
-		}, "Authorization")).Methods("GET", "POST", "OPTIONS")
+		}, "Authorization"))).Methods("GET", "POST", "OPTIONS")
 
 	router.ServeHTTP(w, r)
 }
