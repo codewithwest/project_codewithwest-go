@@ -9,6 +9,8 @@ var ProtectedMutationsAndQueries = []string{
 	"getAdminUserAccessRequests",
 	"getProjects",
 	"getProjectCategories",
+	"getContactMessages",
+	"getIntegrations",
 	// "authenticateClient",
 
 	// Mutations
@@ -16,5 +18,7 @@ var ProtectedMutationsAndQueries = []string{
 	"createProjectCategory",
 	"createProject",
 	"adminUserAccessRequest",
+	"createIntegration",
+	"revokeIntegration",
 	// "createClient",
 }
