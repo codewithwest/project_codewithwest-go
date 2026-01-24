@@ -33,6 +33,7 @@ func GetSchema() (graphql.Schema, error) {
 				"createProjectCategory":  projects.CreateProjectCategoryMutation(types.ProjectCategoryType),
 				"createProject":          projects.CreateProjectMutation(types.ProjectType),
 				"updateProject":          projects.UpdateProjectMutation(types.ProjectType),
+				"deleteProject":          projects.DeleteProjectMutation(graphql.Int),
 				"adminUserAccessRequest": admin.RequestAdminAccess(types.AdminUserRequestType),
 				"createClient":           client.CreateClientMutation(types.ClientType),
 				"createContactMessage":   contact.CreateContactMessageMutation(types.ContactMessageType),

@@ -21,5 +21,6 @@ var ProtectedMutationsAndQueries = []string{
 	"createIntegration",
 	"revokeIntegration",
 	"updateProject",
+	"deleteProject",
 	// "createClient",
 }

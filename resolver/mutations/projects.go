@@ -130,3 +130,29 @@ func UpdateProject(params graphql.ResolveParams) (interface{}, error) {
 
 	return updatedProject, nil
 }
+
+func DeleteProject(params graphql.ResolveParams) (interface{}, error) {
+	id, ok := params.Args["id"].(int)
+	if !ok {
+		return nil, fmt.Errorf("invalid project id")
+	}
+
+	projectCollection, err := mongoDB.ConnectMongoDB("projects")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	result, err := projectCollection.DeleteOne(ctx, bson.M{"id": id})
+	if err != nil {
+		return nil, fmt.Errorf("failed to delete project: %w", err)
+	}
+
+	if result.DeletedCount == 0 {
+		return nil, fmt.Errorf("project with ID %d not found", id)
+	}
+
+	return id, nil
+}

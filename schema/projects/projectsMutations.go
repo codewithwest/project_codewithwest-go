@@ -51,3 +51,16 @@ func UpdateProjectMutation(requiredType *graphql.Object) *graphql.Field {
 		Resolve: mutations.UpdateProject,
 	}
 }
+
+func DeleteProjectMutation(returnType graphql.Output) *graphql.Field {
+	return &graphql.Field{
+		Type:        returnType,
+		Description: "Delete an existing project",
+		Args: graphql.FieldConfigArgument{
+			"id": &graphql.ArgumentConfig{
+				Type: graphql.NewNonNull(graphql.Int),
+			},
+		},
+		Resolve: mutations.DeleteProject,
+	}
+}
