@@ -20,5 +20,6 @@ var ProtectedMutationsAndQueries = []string{
 	"adminUserAccessRequest",
 	"createIntegration",
 	"revokeIntegration",
+	"updateProject",
 	// "createClient",
 }
